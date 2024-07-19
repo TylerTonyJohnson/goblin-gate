@@ -22,17 +22,10 @@
 
 	function attackMonster(monster) {
 		console.log('attack');
-		damageMonster(monster);
 
-		const secondaryMonsters = monsterDatas.filter(
-			(otherMonster) =>
-				otherMonster.type === monster.type &&
-				(otherMonster.coordinates.x === monster.coordinates.x + 1 ||
-					otherMonster.coordinates.x === monster.coordinates.x - 1) &&
-				otherMonster.coordinates.y === monster.coordinates.y
-		);
+		const cluster = getCluster(monster);
 
-		secondaryMonsters.forEach((secondaryMonster) => {
+		cluster.forEach((secondaryMonster) => {
 			damageMonster(secondaryMonster);
 		});
 	}
@@ -69,6 +62,41 @@
 
 			monster.coordinates.y = Math.max(monster.coordinates.y - 1, 0);
 		});
+	}
+
+	function getAdjacentMonsters(monster) {
+		return monsterDatas.filter(
+			(otherMonster) =>
+				otherMonster.type === monster.type &&
+				((otherMonster.coordinates.x === monster.coordinates.x &&
+					(otherMonster.coordinates.y === monster.coordinates.y + 1 ||
+						otherMonster.coordinates.y === monster.coordinates.y - 1)) ||
+					(otherMonster.coordinates.y === monster.coordinates.y &&
+						(otherMonster.coordinates.x === monster.coordinates.x + 1 ||
+							otherMonster.coordinates.x === monster.coordinates.x - 1)))
+		);
+	}
+
+	function getCluster(monster) {
+		const visited = new Set();
+		const cluster = [];
+
+		function traverse(currentMonster) {
+			visited.add(currentMonster);
+			cluster.push(currentMonster);
+
+			const adjacentMonsters = getAdjacentMonsters(currentMonster);
+
+			for (const adjacentMonster of adjacentMonsters) {
+				if (!visited.has(adjacentMonster) && adjacentMonster.type === monster.type) {
+					traverse(adjacentMonster);
+				}
+			}
+		}
+
+		traverse(monster);
+
+		return cluster;
 	}
 </script>
 
