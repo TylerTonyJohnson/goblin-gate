@@ -1,0 +1,38 @@
+[
+	{
+		"type": "black",
+		"name": "Black",
+		"maxHealth": 1,
+		"xp": 1
+	},
+	{
+		"type": "white",
+		"name": "White",
+		"maxHealth": 2,
+		"xp": 2
+	},
+	{
+		"type": "yellow",
+		"name": "Yellow",
+		"maxHealth": 3,
+		"xp": 3
+	},
+	{
+		"type": "green",
+		"name": "Green",
+		"maxHealth": 4,
+		"xp": 4
+	},
+	{
+		"type": "blue",
+		"name": "Blue",
+		"maxHealth": 5,
+		"xp": 5
+	},
+	{
+		"type": "red",
+		"name": "Red",
+		"maxHealth": 6,
+		"xp": 6
+	}
+]
