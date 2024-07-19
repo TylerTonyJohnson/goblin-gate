@@ -1,6 +1,6 @@
 import { MonsterTypes } from '$lib/enums.js';
 
-export default function createLevel(levelData, monsterDefaults, dimensions) {
+export function createLevel(levelData, monsterDefaults, dimensions) {
 	const output = levelData.map((monsterData, index) => {
 		const monsterType = Object.values(MonsterTypes).find(
 			(monsterType) => monsterType.name === monsterData.type
@@ -22,5 +22,33 @@ export default function createLevel(levelData, monsterDefaults, dimensions) {
 			xp: monsterDefault.xp
 		};
 	});
+	return output;
+}
+
+export function createRandomLevel(monsterCount, monsterDefaults, dimensions) {
+	const levelData = Array.from({ length: monsterCount }, () => {
+		const randomType =
+			Object.values(MonsterTypes)[Math.floor(Math.random() * Object.values(MonsterTypes).length)];
+		return randomType ;
+	});
+
+	const output = levelData.map((monsterType, index) => {
+		const monsterDefault = monsterDefaults.find(
+			(monsterDefault) => monsterDefault.type === monsterType.name
+		);
+
+		return {
+			id: crypto.randomUUID(),
+			coordinates: {
+				x: index % dimensions.x,
+				y: Math.floor(index / dimensions.x)
+			},
+			type: monsterType,
+			maxHealth: monsterDefault.maxHealth,
+			currentHealth: monsterDefault.maxHealth,
+			xp: monsterDefault.xp
+		};
+	});
+
 	return output;
 }

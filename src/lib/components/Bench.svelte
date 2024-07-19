@@ -29,8 +29,7 @@
 
 <style>
 	.frame {
-		/* width: 400px;
-		height: 400px; */
+		grid-area: bench;
 		background-color: #00f8;
 		border-radius: 2rem;
 	}
