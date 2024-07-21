@@ -9,20 +9,20 @@
 <div class="frame">
 	<div class="bench-contents">
 		<div class="attack-container">
-            <Token type={TokenTypes.Attack}/>
+            <!-- <Token type={TokenTypes.Attack}/> -->
         </div>
 		<div class="spells-container">
-            <Token type={TokenTypes.Scroll}/>
+            <!-- <Token type={TokenTypes.Scroll}/> -->
         </div>
 		<div class="hearts-container">
-			{#each Array(hearts) as heartToken}
+			<!-- {#each Array(hearts) as heartToken}
 				<Token type={TokenTypes.Heart}/>
-			{/each}
+			{/each} -->
 		</div>
 		<div class="mana-container">
-			{#each Array(mana) as manaToken}
+			<!-- {#each Array(mana) as manaToken}
 				<Token type={TokenTypes.Mana}/>
-			{/each}
+			{/each} -->
 		</div>
 	</div>
 </div>

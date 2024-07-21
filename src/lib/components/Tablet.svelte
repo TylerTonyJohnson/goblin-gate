@@ -10,6 +10,8 @@
 
 	import { createLevel, createRandomLevel } from '$lib/classes/level.svelte.js';
 
+	const { reduceEndurance, currentEndurance } = $props();
+
 	const preferences = getPreferences();
 	const dimensions = { x: 5, y: 7 };
 
@@ -21,12 +23,21 @@
 	$effect(() => shoveDown());
 
 	function attackMonster(monster) {
+		if (currentEndurance < 1) return;
+
 		console.log('attack');
+
+		reduceEndurance();
 
 		const cluster = getCluster(monster);
 
-		cluster.forEach((secondaryMonster) => {
-			damageMonster(secondaryMonster);
+		cluster.forEach((clusterMonster) => {
+			setTimeout(
+				() => {
+					damageMonster(clusterMonster);
+				},
+				getDistance(monster, clusterMonster) * 50
+			);
 		});
 	}
 
@@ -97,6 +108,13 @@
 		traverse(monster);
 
 		return cluster;
+	}
+
+	function getDistance(monster, otherMonster) {
+		return Math.sqrt(
+			Math.pow(Math.abs(monster.coordinates.x - otherMonster.coordinates.x), 2) +
+				Math.pow(Math.abs(monster.coordinates.y - otherMonster.coordinates.y), 2)
+		);
 	}
 </script>
 

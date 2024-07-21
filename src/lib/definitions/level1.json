@@ -23,7 +23,6 @@
 	{ "type": "black" },
 	{ "type": "white" },
 	{ "type": "black" },
-	{ "type": "red" },
-
-	{ "type": "red" }
+	{ "type": "blue" },
+	{ "type": "black" }
 ]
