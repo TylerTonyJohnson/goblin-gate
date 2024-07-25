@@ -2,16 +2,16 @@
 	import yellowGem from '$lib/images/Gem Yellow.png';
 	import grayGem from '$lib/images/Gem Gray.png';
 
-	let { maxEndurance, currentEndurance } = $props();
+	let { maxExperience, currentExperience } = $props();
 </script>
 
 <div class="frame">
 	<div class="display-container">
-		<div class="display">{maxEndurance}</div>
+		<div class="display">{maxExperience}</div>
 	</div>
 	<div class="segment-container">
-		{#each Array(maxEndurance) as segment, index}
-			<div class="segment" class:active={(maxEndurance - index) <= currentEndurance}>
+		{#each Array(maxExperience) as segment, index}
+			<div class="segment" class:active={maxExperience - index <= currentExperience}>
 				<!-- {#if index < currentEndurance}
                     <img src={yellowGem} class='gem' alt='gem' />
                 {:else}
@@ -21,7 +21,7 @@
 		{/each}
 	</div>
 	<div class="display-container">
-		<div class="display">{currentEndurance}</div>
+		<div class="display">{currentExperience}</div>
 	</div>
 </div>
 
@@ -30,9 +30,9 @@
 		display: grid;
 		grid-template-rows: auto 1fr auto;
 		height: 100%;
-		grid-area: endurance;
-		background-color: blue;
-		place-self: end end;
+		grid-area: experience;
+		background-color: teal;
+		place-self: start start;
 		justify-content: space-between;
 		padding: 1.5rem 0;
 		border-radius: 1.5rem;
@@ -70,7 +70,7 @@
 	}
 
 	.active {
-		background-color: yellow;
+		background-color: purple;
 	}
 
 	.segment:not(.active) {

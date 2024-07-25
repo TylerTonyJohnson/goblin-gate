@@ -55,3 +55,17 @@ export class Directions {
 	static Left = new Directions('left');
 	static Right = new Directions('right');
 }
+
+import battleImage from '$lib/images/Battle.svg';
+import villageImage from '$lib/images/Village.svg';
+import nightBattleImage from '$lib/images/Night Battle.svg';
+
+export class LocationTypes {
+	constructor(name, source) {
+		this.name = name;
+		this.source = source;
+	}
+	static Battle = new LocationTypes('battle', battleImage);
+	static NightBattle = new LocationTypes('nightBattle', nightBattleImage);
+	static Village = new LocationTypes('village', villageImage);
+}

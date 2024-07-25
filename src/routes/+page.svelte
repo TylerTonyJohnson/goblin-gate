@@ -1,43 +1,97 @@
 <script>
-	import Bench from '../lib/components/Bench.svelte';
-	import EnduranceBar from '../lib/components/EnduranceBar.svelte';
-	import Header from '../lib/components/Header.svelte';
-	import Tablet from '../lib/components/Tablet.svelte';
+	import fieldImage from '$lib/images/Field.jpg';
+	import villageImage from '$lib/images/Village.png';
+	import tavernImage from '$lib/images/Tavern.png';
+	import blacksmithImage from '$lib/images/Blacksmith.png';
+	import spellshopImage from '$lib/images/Spellshop.png';
 
-	const endurance = 16;
+	import { AppStates, setAppState, getAppState } from '$lib/appState.svelte';
+	import Title from '$lib/components/Title.svelte';
+	import Map from '$lib/components/Map.svelte';
+	import Battle from '$lib/components/Battle.svelte';
+	import Village from '$lib/components/Village.svelte';
+	import { fly } from 'svelte/transition';
 
-	const maxEndurance = $state(endurance);
-	let currentEndurance = $state(endurance);
+	setAppState().state;
+	const appState = getAppState();
 
-	function reduceEndurance() {
-		currentEndurance = Math.max(currentEndurance - 1, 0);
-	}
-
+	$inspect(appState.state);
 </script>
 
-<svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
-</svelte:head>
-
 <div class="frame">
-	<Header />
-	<Tablet {reduceEndurance} {currentEndurance} />
-	<Bench />
-	<EnduranceBar {maxEndurance} {currentEndurance} />
+	{#if appState.state === AppStates.Title || appState.state === AppStates.Map || appState.state === AppStates.Battle}
+		<div
+			class="backdrop"
+			in:fly={{ x: 100, opacity: 0 }}
+			out:fly={{ x: 100, opacity: 1 }}
+			style={`background-image: url(${fieldImage});`}
+		></div>
+		{#if appState.state === AppStates.Title}
+			<Title appState={appState.state} {setAppState} />
+		{:else if appState.state === AppStates.Map}
+			<Map appState={appState.state} {setAppState} />
+		{:else if appState.state === AppStates.Battle}
+			<Battle appState={appState.state} {setAppState} />
+		{/if}
+	{:else if appState.state === AppStates.Village}
+		<div
+			class="backdrop"
+			in:fly={{ x: -100, opacity: 0 }}
+			out:fly={{ x: 100, opacity: 1 }}
+			style={`background-image: url(${villageImage});`}
+		></div>
+		<Village appState={appState.state} {setAppState} />
+	{:else if appState.state === AppStates.Tavern}
+		<div
+			class="backdrop"
+			in:fly={{ x: -100, opacity: 0 }}
+			out:fly={{ x: 100, opacity: 1 }}
+			style={`background-image: url(${tavernImage});`}
+		></div>
+	{:else if appState.state === AppStates.Blacksmith}
+		<div
+			class="backdrop"
+			in:fly={{ x: -100, opacity: 0 }}
+			out:fly={{ x: 100, opacity: 1 }}
+			style={`background-image: url(${blacksmithImage});`}
+		></div>
+	{:else if appState.state === AppStates.Spellshop}
+		<div
+			class="backdrop"
+			in:fly={{ x: -100, opacity: 0 }}
+			out:fly={{ x: 100, opacity: 1 }}
+			style={`background-image: url(${spellshopImage});`}
+		></div>
+	{:else}
+		<div>Error</div>
+	{/if}
 </div>
 
 <style>
 	.frame {
 		position: relative;
+		width: 100%;
 		height: 100%;
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
-		grid-template-rows: auto auto auto;
-		grid-template-areas:
-			'header 	header 	header'
-			'endurance 	tablet 	experience'
-			'. 			bench   .';
-		gap: 1rem;
+		overflow: hidden;
+
+		/* position: absolute; */
+		/* width: 100%;
+		height: 100%;
+		left: 50%;
+		top: 50%; */
+		/* transform: translate(-50%, -50%); */
+		/* display: grid;
+		place-items: center;
+		color: white; */
+	}
+
+	.backdrop {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background-color: #0008;
+		background-size: cover;
+		background-position: center;
+		/* filter:blur(5px); */
 	}
 </style>

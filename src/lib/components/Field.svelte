@@ -5,17 +5,17 @@
 	import { getPreferences } from '$lib/preferences.svelte';
 	// import { MonsterTypes } from '$lib/enums';
 
-	import levelData from '$lib/definitions/level1.json';
+	import levelData from '$lib/definitions/battle1.json';
 	import monsterData from '$lib/definitions/monsterDefaults.json';
 
-	import { createLevel, createRandomLevel } from '$lib/classes/level.svelte.js';
+	import { createBattle } from '$lib/classes/battle.svelte.js';
 
-	const { reduceEndurance, currentEndurance } = $props();
+	const { reduceEndurance, currentEndurance, increaseExperience } = $props();
 
 	const preferences = getPreferences();
 	const dimensions = { x: 5, y: 7 };
 
-	let monsterDatas = $state(createLevel(levelData, monsterData, dimensions));
+	let monsterDatas = $state(createBattle(levelData, monsterData, dimensions));
 	// let monsterDatas = $state(createRandomLevel(50, monsterData, dimensions));
 
 	// $inspect(monsterDatas);
@@ -51,6 +51,7 @@
 
 	function killMonster(monster) {
 		console.log('kill');
+		increaseExperience(monster.xp);
 		removeMonster(monster);
 		shoveDown();
 	}

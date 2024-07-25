@@ -1,6 +1,6 @@
 import { MonsterTypes } from '$lib/enums.js';
 
-export function createLevel(levelData, monsterDefaults, dimensions) {
+export function createBattle(levelData, monsterDefaults, dimensions) {
 	const output = levelData.map((monsterData, index) => {
 		const monsterType = Object.values(MonsterTypes).find(
 			(monsterType) => monsterType.name === monsterData.type
@@ -25,7 +25,7 @@ export function createLevel(levelData, monsterDefaults, dimensions) {
 	return output;
 }
 
-export function createRandomLevel(monsterCount, monsterDefaults, dimensions) {
+export function createRandomBattle(monsterCount, monsterDefaults, dimensions) {
 	const levelData = Array.from({ length: monsterCount }, () => {
 		const randomType =
 			Object.values(MonsterTypes)[Math.floor(Math.random() * Object.values(MonsterTypes).length)];

@@ -7,8 +7,9 @@
 }	
 
 :root {
-
 }
+
+
 
 
 img {
@@ -17,4 +18,11 @@ img {
 	-ms-user-select: none; /* Internet Explorer/Edge */
 	user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 	-webkit-user-drag: none; /* Chrome */
+}
+
+@font-face {
+    font-family: 'Machine Gunk';
+    font-style: normal;
+    font-weight: 400; /* Normal weight */
+    src: url('MachineGunk.ttf') format('ttf');
 }
