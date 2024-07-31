@@ -1,4 +1,7 @@
 <script>
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+
 	import { AppStates, getAppState } from '$lib/appState.svelte';
 
 	let button1Text = 'Button 1';
@@ -11,15 +14,29 @@
 	}
 
 	function enterGame() {
-		console.log('Entering game');
 		appState.state = AppStates.Title;
+	}
+
+	function toggleEdit(event) {
+		if (event.target.checked) {
+			appState.state = AppStates.Edit;
+		} else {
+			appState.state = AppStates.Title;
+		}
+
+		console.log(appState.state);
 	}
 </script>
 
 <header>
 	<button class="left" onclick={() => handleClick(button1Text)}>{button1Text}</button>
 	<h1 onclick={enterGame}>Goblin Gate</h1>
-	<button class="right" onclick={() => handleClick(button3Text)}>{button3Text}</button>
+	<!-- <button class="right" onclick={() => handleClick(button3Text)}>{button3Text}</button> -->
+	<!-- <input class='right' type="checkbox" /> -->
+	<div class="right">
+		<label for="input">EDIT</label>
+		<input type="checkbox" onchange={toggleEdit} />
+	</div>
 </header>
 
 <style>

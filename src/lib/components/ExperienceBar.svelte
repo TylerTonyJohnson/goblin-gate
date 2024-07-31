@@ -1,11 +1,12 @@
 <script>
 	import yellowGem from '$lib/images/Gem Yellow.png';
 	import grayGem from '$lib/images/Gem Gray.png';
+	import { fly } from 'svelte/transition';
 
 	let { maxExperience, currentExperience } = $props();
 </script>
 
-<div class="frame">
+<div class="frame" transition:fly={{x: 200}}>
 	<div class="display-container">
 		<div class="display">{maxExperience}</div>
 	</div>
@@ -30,7 +31,7 @@
 		display: grid;
 		grid-template-rows: auto 1fr auto;
 		height: 100%;
-		grid-area: experience;
+		grid-area: right;
 		background-color: teal;
 		place-self: start start;
 		justify-content: space-between;

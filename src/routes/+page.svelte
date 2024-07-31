@@ -4,6 +4,7 @@
 	import tavernImage from '$lib/images/Tavern.png';
 	import blacksmithImage from '$lib/images/Blacksmith.png';
 	import spellshopImage from '$lib/images/Spellshop.png';
+	import editImage from '$lib/images/Blueprint.png';
 
 	import { AppStates, setAppState, getAppState } from '$lib/appState.svelte';
 	import Title from '$lib/components/Title.svelte';
@@ -11,27 +12,27 @@
 	import Battle from '$lib/components/Battle.svelte';
 	import Village from '$lib/components/Village.svelte';
 	import { fly } from 'svelte/transition';
+	import Tavern from '../lib/components/Tavern.svelte';
 
-	setAppState().state;
 	const appState = getAppState();
 
-	$inspect(appState.state);
+	// $inspect(appState.state);
 </script>
 
 <div class="frame">
 	{#if appState.state === AppStates.Title || appState.state === AppStates.Map || appState.state === AppStates.Battle}
 		<div
 			class="backdrop"
-			in:fly={{ x: 100, opacity: 0 }}
+			in:fly={{ x: -100, opacity: 0 }}
 			out:fly={{ x: 100, opacity: 1 }}
 			style={`background-image: url(${fieldImage});`}
 		></div>
 		{#if appState.state === AppStates.Title}
-			<Title appState={appState.state} {setAppState} />
+			<Title />
 		{:else if appState.state === AppStates.Map}
-			<Map appState={appState.state} {setAppState} />
+			<Map />
 		{:else if appState.state === AppStates.Battle}
-			<Battle appState={appState.state} {setAppState} />
+			<Battle />
 		{/if}
 	{:else if appState.state === AppStates.Village}
 		<div
@@ -48,6 +49,7 @@
 			out:fly={{ x: 100, opacity: 1 }}
 			style={`background-image: url(${tavernImage});`}
 		></div>
+		<Tavern />
 	{:else if appState.state === AppStates.Blacksmith}
 		<div
 			class="backdrop"
@@ -62,6 +64,14 @@
 			out:fly={{ x: 100, opacity: 1 }}
 			style={`background-image: url(${spellshopImage});`}
 		></div>
+	{:else if appState.state === AppStates.Edit}
+		<div
+			class="backdrop"
+			in:fly={{ x: -100, opacity: 0 }}
+			out:fly={{ x: 100, opacity: 0 }}
+			style={`background-image: url(${editImage});`}
+		></div>
+		<Battle />
 	{:else}
 		<div>Error</div>
 	{/if}
@@ -69,9 +79,8 @@
 
 <style>
 	.frame {
-		position: relative;
-		width: 100%;
-		height: 100%;
+		position: absolute;
+		inset: 0;
 		overflow: hidden;
 
 		/* position: absolute; */

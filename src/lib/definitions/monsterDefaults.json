@@ -3,36 +3,42 @@
 		"type": "black",
 		"name": "Black",
 		"maxHealth": 1,
+		"xpMinimum": 5,
 		"xp": 1
 	},
 	{
 		"type": "white",
 		"name": "White",
 		"maxHealth": 2,
-		"xp": 2
+		"xpMinimum": 4,
+		"xp": 1
 	},
 	{
 		"type": "yellow",
 		"name": "Yellow",
 		"maxHealth": 3,
-		"xp": 3
+		"xpMinimum": 3,
+		"xp": 2
 	},
 	{
 		"type": "green",
 		"name": "Green",
 		"maxHealth": 4,
-		"xp": 4
+		"xpMinimum": 2,
+		"xp": 2
 	},
 	{
 		"type": "blue",
 		"name": "Blue",
 		"maxHealth": 5,
-		"xp": 5
+		"xpMinimum": 2,
+		"xp": 3
 	},
 	{
 		"type": "red",
 		"name": "Red",
 		"maxHealth": 6,
-		"xp": 6
+		"xpMinimum": 2,
+		"xp": 3
 	}
 ]

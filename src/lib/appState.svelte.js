@@ -13,10 +13,11 @@ export class AppStates {
 	static GameOver = new AppStates('gameOver');
 	static Battle = new AppStates('battle');
 	static Boss = new AppStates('boss');
+	static Edit = new AppStates('edit');
 }
 
-export function createAppState() {
-	let state = $state(AppStates.Title);
+export function createAppState(initialState = AppStates.Edit) {
+	let state = $state(initialState);
 
 	return {
 		get state() {
@@ -30,8 +31,8 @@ export function createAppState() {
 
 const APP_STATE_KEY = Symbol('appState');
 
-export function setAppState() {
-	return setContext(APP_STATE_KEY, createAppState());
+export function setAppState(initialState) {
+	return setContext(APP_STATE_KEY, createAppState(initialState));
 }
 
 export function getAppState() {

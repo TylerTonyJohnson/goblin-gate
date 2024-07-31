@@ -1,5 +1,5 @@
 <script>
-	import { fade, scale } from 'svelte/transition';
+	import { fade, scale, fly } from 'svelte/transition';
 	import { GemTypes } from '../enums.js';
 	import { getPreferences } from '$lib/preferences.svelte';
 
@@ -14,6 +14,7 @@
 <div
 	class="frame"
 	onclick={attack}
+	in:fly={{y: -500, duration: 1000}}
 	out:scale
 	style={`
 		left: ${monsterData.coordinates.x * preferences.tileSize + preferences.tileGap * monsterData.coordinates.x}px; 
@@ -22,10 +23,7 @@
 		height: ${preferences.tileSize}px;
 	`}
 >
-	<picture class="picture">
-		<source srcset={monsterData.type.source} type="image/png" />
-		<img class="profile" src={monsterData.type.source} />
-	</picture>
+	<div class="image" style={`background-image: url(${monsterData.type.source})`}></div>
 	<div class="health-bar">
 		{#each Array(monsterData.maxHealth) as heartToken, index}
 			{#if index < monsterData.currentHealth}
@@ -52,16 +50,19 @@
 		transition:
 			left 0.5s,
 			bottom 0.5s;
+		transition-delay: 0.5s;
 	}
 
 	.frame:hover {
 		scale: 1.1;
 	}
 
-	.picture {
+	.image {
 		position: absolute;
 		width: 100%;
 		height: 100%;
+		background-color: pink;
+		background-size: cover;
 	}
 
 	.debug {
@@ -71,11 +72,6 @@
 		justify-content: center;
 		align-items: center;
 		color: lime;
-	}
-
-	.profile {
-		width: 100%;
-		height: 100%;
 	}
 
 	.health-bar {

@@ -6,39 +6,63 @@
 	// import { MonsterTypes } from '$lib/enums';
 
 	import levelData from '$lib/definitions/battle1.json';
-	import monsterData from '$lib/definitions/monsterDefaults.json';
 
-	import { createBattle } from '$lib/classes/battle.svelte.js';
+	import { createBattle, createRandomBattle } from '$lib/classes/battle.svelte.js';
 
-	const { reduceEndurance, currentEndurance, increaseExperience } = $props();
+	const { battleData, reduceEndurance, currentEndurance, increaseExperience, hitBox } = $props();
 
 	const preferences = getPreferences();
 	const dimensions = { x: 5, y: 7 };
+	// const hitBox = {
+	// 	coordinates: { x: 0, y: 0 },
+	// 	dimensions: { x: 5, y: 5 }
+	// };
 
-	let monsterDatas = $state(createBattle(levelData, monsterData, dimensions));
-	// let monsterDatas = $state(createRandomLevel(50, monsterData, dimensions));
+	// let monsterDatas = $state(createBattle(levelData, dimensions));
+	// let monsterDatas = $state(createRandomBattle(50, dimensions));
 
-	// $inspect(monsterDatas);
-
-	$effect(() => shoveDown());
-
-	function attackMonster(monster) {
+	function attackMonster(monster, damage = 1) {
 		if (currentEndurance < 1) return;
-
-		console.log('attack');
+		if (!isInHitbox(monster, hitBox)) return;
 
 		reduceEndurance();
 
 		const cluster = getCluster(monster);
 
+		// Do the damage
+
+		const killedMonsters = [];
+
 		cluster.forEach((clusterMonster) => {
-			setTimeout(
-				() => {
-					damageMonster(clusterMonster);
-				},
-				getDistance(monster, clusterMonster) * 50
-			);
+			damageMonster(clusterMonster);
+			if (clusterMonster.currentHealth < 1) {
+				killedMonsters.push(clusterMonster);
+			}
 		});
+
+		// Experience
+		const experience = calculateExperience(killedMonsters);
+		increaseExperience(experience);
+	}
+
+	function calculateExperience(cluster) {
+		// Get unique values
+
+		const clusterTypes = cluster.map((monster) => monster.type);
+		const uniqueCluster = [...new Set(clusterTypes)];
+
+		// For each unique value, calculate the count
+		let experience = 0;
+		uniqueCluster.forEach((uniqueMonsterType) => {
+			const count = cluster.filter((monster) => monster.type === uniqueMonsterType).length;
+
+			console.log(count, uniqueMonsterType);
+			if (count >= uniqueMonsterType.xpMinimum) {
+				experience += uniqueMonsterType.xpCombo + count * uniqueMonsterType.xpDrop;
+			}
+		});
+
+		return experience;
 	}
 
 	function damageMonster(monster) {
@@ -51,20 +75,19 @@
 
 	function killMonster(monster) {
 		console.log('kill');
-		increaseExperience(monster.xp);
 		removeMonster(monster);
 		shoveDown();
 	}
 
 	function removeMonster(monster) {
-		monsterDatas.splice(monsterDatas.indexOf(monster), 1);
+		battleData.splice(battleData.indexOf(monster), 1);
 	}
 
 	function shoveDown() {
-		monsterDatas.forEach((monster) => {
+		battleData.forEach((monster) => {
 			if (monster.coordinates.y === 0) return;
 			if (
-				monsterDatas.find(
+				battleData.find(
 					(otherMonster) =>
 						otherMonster.coordinates.x === monster.coordinates.x &&
 						otherMonster.coordinates.y === monster.coordinates.y - 1
@@ -74,19 +97,6 @@
 
 			monster.coordinates.y = Math.max(monster.coordinates.y - 1, 0);
 		});
-	}
-
-	function getAdjacentMonsters(monster) {
-		return monsterDatas.filter(
-			(otherMonster) =>
-				otherMonster.type === monster.type &&
-				((otherMonster.coordinates.x === monster.coordinates.x &&
-					(otherMonster.coordinates.y === monster.coordinates.y + 1 ||
-						otherMonster.coordinates.y === monster.coordinates.y - 1)) ||
-					(otherMonster.coordinates.y === monster.coordinates.y &&
-						(otherMonster.coordinates.x === monster.coordinates.x + 1 ||
-							otherMonster.coordinates.x === monster.coordinates.x - 1)))
-		);
 	}
 
 	function getCluster(monster) {
@@ -109,6 +119,29 @@
 		traverse(monster);
 
 		return cluster;
+
+		function getAdjacentMonsters(monster) {
+			return battleData.filter(
+				(otherMonster) =>
+					otherMonster.type === monster.type &&
+					isInHitbox(otherMonster, hitBox) &&
+					((otherMonster.coordinates.x === monster.coordinates.x &&
+						(otherMonster.coordinates.y === monster.coordinates.y + 1 ||
+							otherMonster.coordinates.y === monster.coordinates.y - 1)) ||
+						(otherMonster.coordinates.y === monster.coordinates.y &&
+							(otherMonster.coordinates.x === monster.coordinates.x + 1 ||
+								otherMonster.coordinates.x === monster.coordinates.x - 1)))
+			);
+		}
+	}
+
+	function isInHitbox(monster, hitbox) {
+		return (
+			monster.coordinates.x >= hitbox.coordinates.x &&
+			monster.coordinates.x < hitbox.coordinates.x + hitbox.dimensions.x &&
+			monster.coordinates.y >= hitbox.coordinates.y &&
+			monster.coordinates.y < hitbox.coordinates.y + hitbox.dimensions.y
+		);
 	}
 
 	function getDistance(monster, otherMonster) {
@@ -127,15 +160,19 @@
 				height: ${preferences.tileSize * (dimensions.y - 0.5) + preferences.tileGap * (dimensions.y - 1)}px;
 				`}
 	>
-		{#each monsterDatas as monsterData (monsterData.id)}
+		{#each battleData as monsterData (monsterData.id)}
 			<Tile {monsterData} attack={() => attackMonster(monsterData)} />
 		{/each}
 	</div>
+	<div class="hit-box"></div>
 </div>
 
 <style>
 	.frame {
+		position: relative;
 		grid-area: tablet;
+		display: grid;
+		place-items: end;
 		background-color: #0008;
 		border-radius: 0 0 2rem 2rem;
 		padding-left: 1rem;
@@ -146,6 +183,20 @@
 
 	.monsters-grid {
 		position: relative;
+		/* bottom: 0; */
 		/* background-color: red; */
+	}
+
+	.hit-box {
+		position: absolute;
+		left: 0.5rem;
+		bottom: 0.5rem;
+		width: calc(100% - 1rem);
+		aspect-ratio: 1 / 1;
+		border: solid rgb(255, 64, 220) 5px;
+		/* background-color: #0008; */
+		border-radius: 1.5rem;
+		/* background-color: transparent; */
+		pointer-events: none;
 	}
 </style>

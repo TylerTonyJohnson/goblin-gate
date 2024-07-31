@@ -1,6 +1,9 @@
 import { MonsterTypes } from '$lib/enums.js';
+import monsterDefaults from '$lib/definitions/monsterDefaults.json';
 
-export function createBattle(levelData, monsterDefaults, dimensions) {
+import { seededGenerator } from '$lib/classes/random.svelte';
+
+export function createBattle(levelData, dimensions) {
 	const output = levelData.map((monsterData, index) => {
 		const monsterType = Object.values(MonsterTypes).find(
 			(monsterType) => monsterType.name === monsterData.type
@@ -24,29 +27,45 @@ export function createBattle(levelData, monsterDefaults, dimensions) {
 	});
 	return output;
 }
+export function createRandomBattle(battleParameters, seed) {
+	const randomGenerator = seededGenerator(seed);
 
-export function createRandomBattle(monsterCount, monsterDefaults, dimensions) {
-	const levelData = Array.from({ length: monsterCount }, () => {
-		const randomType =
-			Object.values(MonsterTypes)[Math.floor(Math.random() * Object.values(MonsterTypes).length)];
-		return randomType ;
+	console.log(seed);
+
+	const monsterWeightTotal = battleParameters.monsters.reduce(
+		(total, monsterWeight) => total + monsterWeight.weight,
+		0
+	);
+
+	let cumulativeWeight = 0;
+
+	// Calculate cumulative weights
+	const cumulativeWeights = battleParameters.monsters.map((monsterWeight) => {
+		cumulativeWeight += monsterWeight.weight / monsterWeightTotal;
+		return { type: monsterWeight.type, weight: cumulativeWeight };
 	});
 
-	const output = levelData.map((monsterType, index) => {
-		const monsterDefault = monsterDefaults.find(
-			(monsterDefault) => monsterDefault.type === monsterType.name
-		);
+	// Generate random monster data based on cumulative weights
+	const monsterData = Array.from({ length: battleParameters.monsterCount }, () => {
 
+		const randomType = cumulativeWeights.find(
+			(cumulativeWeight) => randomGenerator() <= cumulativeWeight.weight
+		).type;
+
+		return randomType;
+	});
+
+	// Create battle data
+	const output = monsterData.map((monsterType, index) => {
 		return {
 			id: crypto.randomUUID(),
 			coordinates: {
-				x: index % dimensions.x,
-				y: Math.floor(index / dimensions.x)
+				x: index % battleParameters.dimensions.x,
+				y: Math.floor(index / battleParameters.dimensions.x)
 			},
 			type: monsterType,
-			maxHealth: monsterDefault.maxHealth,
-			currentHealth: monsterDefault.maxHealth,
-			xp: monsterDefault.xp
+			maxHealth: monsterType.maxHealth,
+			currentHealth: monsterType.maxHealth
 		};
 	});
 

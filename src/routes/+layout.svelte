@@ -7,7 +7,7 @@
 	import Footer from '../lib/components/Footer.svelte';
 
 	setPreferences();
-	const appState = setAppState();
+	setAppState();
 </script>
 
 <div class="app">
@@ -31,6 +31,7 @@
 	}
 
 	main {
+		position: relative;
 		flex: 1;
 		display: grid;
 		place-items: center;

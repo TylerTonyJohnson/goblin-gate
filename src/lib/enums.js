@@ -6,16 +6,62 @@ import profileBlue from '$lib/images/Monster Profile Blue.png';
 import profileRed from '$lib/images/Monster Profile Red.png';
 
 export class MonsterTypes {
-	constructor(name, source) {
-		this.name = name;
-		this.source = source;
+	constructor(type) {
+		this.name = type.name;
+		this.source = type.source;
+		this.maxHealth = type.maxHealth;
+		this.xpMinimum = type.xpMinimum;
+		this.xpDrop = type.xpDrop;
+		this.xpCombo = type.xpCombo;
 	}
-	static Black = new MonsterTypes('black', profileBlack);
-	static White = new MonsterTypes('white', profileWhite);
-	static Yellow = new MonsterTypes('yellow', profileYellow);
-	static Green = new MonsterTypes('green', profileGreen);
-	static Blue = new MonsterTypes('blue', profileBlue);
-	static Red = new MonsterTypes('red', profileRed);
+	static Black = new MonsterTypes({
+		name: 'Black',
+		source: profileBlack,
+		maxHealth: 1,
+		xpMinimum: 5,
+		xpDrop: 1,
+		xpCombo: 1
+	});
+	static White = new MonsterTypes({
+		name: 'White',
+		source: profileWhite,
+		maxHealth: 2,
+		xpMinimum: 4,
+		xpDrop: 1,
+		xpCombo: 1
+	});
+	static Yellow = new MonsterTypes({
+		name: 'Yellow',
+		source: profileYellow,
+		maxHealth: 3,
+		xpMinimum: 3,
+		xpDrop: 1,
+		xpCombo: 2
+	});
+	static Green = new MonsterTypes({
+		name: 'Green',
+		source: profileGreen,
+		maxHealth: 4,
+		xpMinimum: 2,
+		xpDrop: 1,
+		xpCombo: 2
+	});
+	static Blue = new MonsterTypes({
+		name: 'Blue',
+		source: profileBlue,
+		maxHealth: 5,
+		xpMinimum: 2,
+		xpDrop: 1,
+		xpCombo: 3
+	});
+	static Red = new MonsterTypes({
+		name: 'Red',
+		source: profileRed,
+		maxHealth: 6,
+		xpMinimum: 2,
+		xpDrop: 1,
+		xpCombo: 3
+	});
 }
 
 import gemGreen from '$lib/images/Gem Green.png';
