@@ -30,8 +30,6 @@ export function createBattle(levelData, dimensions) {
 export function createRandomBattle(battleParameters, seed) {
 	const randomGenerator = seededGenerator(seed);
 
-	console.log(seed);
-
 	const monsterWeightTotal = battleParameters.monsters.reduce(
 		(total, monsterWeight) => total + monsterWeight.weight,
 		0

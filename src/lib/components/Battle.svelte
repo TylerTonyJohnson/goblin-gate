@@ -38,13 +38,11 @@
 		]
 	});
 
-
-
 	let germ = $state(getRandomWord());
 
-	let seedWater = $derived(rawSeed(battleParameters.monsters));
+	let seedWater = $derived(battleParameters.monsterCount + rawSeed(battleParameters.monsters));
 
-	let seed = $derived(germ + seedWater);
+	let seed = $derived(germ + '-' + seedWater);
 
 	function rawSeed(weights) {
 		return weights.reduce((acc, monsterWeight) => {
@@ -53,7 +51,15 @@
 	}
 
 	let battleData = $state();
-	resetBattle()
+	resetBattle();
+
+	$inspect(battleData);
+
+	let attackCount = $state(0);
+
+	function hit() {
+		attackCount = attackCount + 1;
+	}
 
 	/* 
 		Endurance
@@ -95,7 +101,7 @@
 </svelte:head>
 
 <div class="frame" transition:fade>
-	<Field {battleData} {reduceEndurance} {currentEndurance} {increaseExperience} {hitBox} />
+	<Field {battleData} {battleParameters} {hit} {reduceEndurance} {currentEndurance} {increaseExperience} {hitBox} />
 	<Bench />
 
 	{#if appState.state !== AppStates.Edit}
@@ -103,7 +109,7 @@
 		<ExperienceBar {maxExperience} {currentExperience} />
 	{:else}
 		<BattleMenu {battleParameters} {seed} {resetBattle} {createBattle} />
-		<RunMenu />
+		<RunMenu {attackCount} />
 	{/if}
 	{#if currentEndurance < 1}
 		<Defeat />

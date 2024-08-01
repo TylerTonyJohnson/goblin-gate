@@ -2,7 +2,6 @@
 	import { fly } from 'svelte/transition';
 
 	let { battleParameters = $bindable(), seed, resetBattle, createBattle } = $props();
-
 </script>
 
 <div class="frame" transition:fly={{ x: -200 }}>
@@ -15,20 +14,27 @@
 		<textarea class="seed">{seed}</textarea>
 	</div>
 	<div class="slider-container">
-		<div class="monster-weights">
-			{#each battleParameters.monsters as monsterWeight, index}
-				<div class="slider">
-					<label for="name1">{monsterWeight.type.name} {monsterWeight.weight}</label>
-					<input
-						type="range"
-						id="name1"
-						min="0"
-						max="1"
-						bind:value={monsterWeight.weight}
-						step="0.1"
-					/>
+		<div class="group">
+			<div class="label">MONSTERS</div>
+			<div class="monster-weights">
+				<div class="count-container">
+					<label for="monster-count">Count</label>
+					<input class='monster-count' type="number" bind:value={battleParameters.monsterCount} />
 				</div>
-			{/each}
+				{#each battleParameters.monsters as monsterWeight, index}
+					<div class="slider">
+						<label for="name1">{monsterWeight.type.name} {monsterWeight.weight}</label>
+						<input
+							type="range"
+							id="name1"
+							min="0"
+							max="1"
+							bind:value={monsterWeight.weight}
+							step="0.1"
+						/>
+					</div>
+				{/each}
+			</div>
 		</div>
 	</div>
 </div>
@@ -95,6 +101,27 @@
 		justify-content: center;
 		align-items: center;
 		border: solid 1px black;
-        color: white;
+		color: white;
+	}
+
+	.label {
+		/* border: solid red 1px; */
+		color: white;
+		text-align: center;
+	}
+
+	.count-container {
+		display: flex;
+		/* flex-direction: column; */
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem;
+		gap: 1rem;
+		color: white;
+		border: solid 1px black;
+	}
+
+	.monster-count {
+		width: 4rem;
 	}
 </style>

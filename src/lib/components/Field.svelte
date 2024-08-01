@@ -1,38 +1,29 @@
 <script>
 	import Tile from './Tile.svelte';
-	import { supabase } from '$lib/supabase.js';
-	// import { setTablet } from '$lib/classes/tablet.svelte';
 	import { getPreferences } from '$lib/preferences.svelte';
-	// import { MonsterTypes } from '$lib/enums';
+	import { AppStates, getAppState } from '$lib/appState.svelte';
 
-	import levelData from '$lib/definitions/battle1.json';
+	const appState = getAppState();
 
-	import { createBattle, createRandomBattle } from '$lib/classes/battle.svelte.js';
-
-	const { battleData, reduceEndurance, currentEndurance, increaseExperience, hitBox } = $props();
+	let { battleData, battleParameters, hit, reduceEndurance, currentEndurance, increaseExperience, hitBox } = $props();
 
 	const preferences = getPreferences();
-	const dimensions = { x: 5, y: 7 };
-	// const hitBox = {
-	// 	coordinates: { x: 0, y: 0 },
-	// 	dimensions: { x: 5, y: 5 }
-	// };
-
-	// let monsterDatas = $state(createBattle(levelData, dimensions));
-	// let monsterDatas = $state(createRandomBattle(50, dimensions));
 
 	function attackMonster(monster, damage = 1) {
+		
+		// Can we attack?
 		if (currentEndurance < 1) return;
 		if (!isInHitbox(monster, hitBox)) return;
+		hit();
 
-		reduceEndurance();
+		// Did we spend endurance?
+		if (appState.state === AppStates.Battle) reduceEndurance();
 
+		// Who should be attacked?
 		const cluster = getCluster(monster);
-
-		// Do the damage
-
 		const killedMonsters = [];
 
+		// Do the damage
 		cluster.forEach((clusterMonster) => {
 			damageMonster(clusterMonster);
 			if (clusterMonster.currentHealth < 1) {
@@ -156,8 +147,8 @@
 	<div
 		class="monsters-grid"
 		style={`
-				width: ${preferences.tileSize * dimensions.x + preferences.tileGap * (dimensions.x - 1)}px;
-				height: ${preferences.tileSize * (dimensions.y - 0.5) + preferences.tileGap * (dimensions.y - 1)}px;
+				width: ${preferences.tileSize * battleParameters.dimensions.x + preferences.tileGap * (battleParameters.dimensions.x - 1)}px;
+				height: ${preferences.tileSize * (battleParameters.dimensions.y - 0.5) + preferences.tileGap * (battleParameters.dimensions.y - 1)}px;
 				`}
 	>
 		{#each battleData as monsterData (monsterData.id)}

@@ -1,12 +1,6 @@
 export function seededGenerator(seed) {
 
-    console.log(seed);
-
-    const validatedSeed = Math.abs(seed);
-
-	const hashedSeed = hashSeed(validatedSeed);
-
-    console.log(hashedSeed);
+	const hashedSeed = hashSeed(seed);
 
 	const m = 2 ** 35 - 31;
 	const a = 185852;
@@ -25,7 +19,7 @@ function hashSeed(seed) {
 		hash ^= seed.charCodeAt(i);
 		hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
 	}
-	return hash;
+	return Math.abs(hash);
 }
 
 export function getRandomWord() {
