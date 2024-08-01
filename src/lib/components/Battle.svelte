@@ -50,12 +50,10 @@
 		}, '');
 	}
 
+	let attackCount = $state(0);
+
 	let battleData = $state();
 	resetBattle();
-
-	$inspect(battleData);
-
-	let attackCount = $state(0);
 
 	function hit() {
 		attackCount = attackCount + 1;
@@ -88,10 +86,12 @@
 	async function createBattle() {
 		germ = getRandomWord();
 		battleData = createRandomBattle(battleParameters, seed);
+		attackCount = 0;
 	}
 
 	function resetBattle() {
 		battleData = createRandomBattle(battleParameters, seed);
+		attackCount = 0;
 	}
 </script>
 
@@ -101,7 +101,15 @@
 </svelte:head>
 
 <div class="frame" transition:fade>
-	<Field {battleData} {battleParameters} {hit} {reduceEndurance} {currentEndurance} {increaseExperience} {hitBox} />
+	<Field
+		{battleData}
+		{battleParameters}
+		{hit}
+		{reduceEndurance}
+		{currentEndurance}
+		{increaseExperience}
+		{hitBox}
+	/>
 	<Bench />
 
 	{#if appState.state !== AppStates.Edit}
