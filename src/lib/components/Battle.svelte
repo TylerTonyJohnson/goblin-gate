@@ -100,6 +100,9 @@
 		} else if (player.currentWeapon) {
 			attackMonster(selectedMonsters, player.currentWeapon);
 		}
+
+		// Reset
+		selectedMonsters = [];
 	}
 
 	/* 
@@ -130,7 +133,6 @@
 
 		// Reset Values
 		player.changeSpell(null);
-		selectedMonsters = [];
 	}
 
 	function attackMonster(monsters, weapon) {
