@@ -1,18 +1,21 @@
 <script>
-	import yellowGem from '$lib/images/Gem Yellow.png';
-	import grayGem from '$lib/images/Gem Gray.png';
 	import { fly } from 'svelte/transition';
 
-	let { maxEndurance, currentEndurance } = $props();
+	import yellowGem from '$lib/images/Gem Yellow.png';
+	import grayGem from '$lib/images/Gem Gray.png';
+
+	import { getPlayer } from '$lib/classes/player.svelte';
+
+	let { maxEndurance, currentEndurance } = getPlayer();
 </script>
 
-<div class="frame" transition:fly={{x: -200}}>
+<div class="frame" transition:fly={{ x: -200 }}>
 	<div class="display-container">
 		<div class="display">{maxEndurance}</div>
 	</div>
 	<div class="segment-container">
 		{#each Array(maxEndurance) as segment, index}
-			<div class="segment" class:active={(maxEndurance - index) <= currentEndurance}>
+			<div class="segment" class:active={maxEndurance - index <= currentEndurance}>
 				<!-- {#if index < currentEndurance}
                     <img src={yellowGem} class='gem' alt='gem' />
                 {:else}

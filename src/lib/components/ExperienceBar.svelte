@@ -1,12 +1,14 @@
 <script>
+	import { fly } from 'svelte/transition';
 	import yellowGem from '$lib/images/Gem Yellow.png';
 	import grayGem from '$lib/images/Gem Gray.png';
-	import { fly } from 'svelte/transition';
 
-	let { maxExperience, currentExperience } = $props();
+	import { getPlayer } from '$lib/classes/player.svelte';
+
+	let { maxExperience, currentExperience } = getPlayer();
 </script>
 
-<div class="frame" transition:fly={{x: 200}}>
+<div class="frame" transition:fly={{ x: 200 }}>
 	<div class="display-container">
 		<div class="display">{maxExperience}</div>
 	</div>

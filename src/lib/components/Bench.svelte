@@ -1,69 +1,108 @@
 <script>
-	import { TokenTypes } from '../enums';
-	import Token from './Token.svelte';
+	import { getPlayer } from '$lib/classes/player.svelte';
 
-	const hearts = 4;
-	const mana = 4;
+	const player = getPlayer();
+
+	function handleWeaponClick(weapon) {
+		player.changeWeapon(weapon);
+	}
+
+	function handleSpellClick(spell) {
+		player.changeSpell(spell);
+	}
+
+	function handleExitClick(event) {
+		// event.preventDefault();
+		event.stopPropagation();
+		console.log('exit');
+		player.changeSpell(null);
+	}
 </script>
 
 <div class="frame">
-	<div class="bench-contents">
-		<div class="attack-container">
-            <!-- <Token type={TokenTypes.Attack}/> -->
-        </div>
-		<div class="spells-container">
-            <!-- <Token type={TokenTypes.Scroll}/> -->
-        </div>
-		<div class="hearts-container">
-			<!-- {#each Array(hearts) as heartToken}
-				<Token type={TokenTypes.Heart}/>
-			{/each} -->
-		</div>
-		<div class="mana-container">
-			<!-- {#each Array(mana) as manaToken}
-				<Token type={TokenTypes.Mana}/>
-			{/each} -->
-		</div>
+	<div class="weapons">
+		{#each player.unlockedWeapons as weapon}
+			<button
+				class="weapon"
+				class:active={weapon === player.currentWeapon}
+				class:disabled={player.currentSpell}
+				onclick={() => handleWeaponClick(weapon)}
+				style={`background-image: url(${weapon.source})`}
+			></button>
+		{/each}
+	</div>
+	<div class="spells">
+		{#each player.unlockedSpells as spell}
+			<button
+				class="spell"
+				class:active={spell === player.currentSpell}
+				onclick={() => handleSpellClick(spell)}
+				style={`background-image: url(${spell.source})`}
+			>
+			{#if spell === player.currentSpell}
+				<button class='exit' onclick={handleExitClick}>X</button>
+			{/if}
+		</button>
+		{/each}
 	</div>
 </div>
 
 <style>
 	.frame {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 		grid-area: bench;
 		background-color: #00f8;
 		border-radius: 2rem;
-	}
-
-	.bench-contents {
-		display: grid;
-		grid-template-columns: repeat(2, auto);
-		grid-template-rows: repeat(2, auto);
-        grid-template-areas: 
-            "attack hearts"
-            "spells mana";
-		gap: 1rem;
 		padding: 1rem;
-		place-items: start;
-		/* border-radius: 1rem; */
 	}
 
-    .attack-container {
-        grid-area: attack;
-    }
+	.weapons,
+	.spells {
+		display: flex;
+		gap: 1rem;
+	}
 
-    .spells-container {
-        grid-area: spells;
-    }
+	.weapons {
+		place-self: start;
+	}
 
-    .hearts-container {
-        grid-area: hearts;
-        display: flex;
-        gap: 0.25rem;
-    }
+	.spells {
+		place-self: end;
+	}
 
-    .mana-container {
-        grid-area: mana;
-        display: flex;
-        gap: 0.25rem;
-    }
+	.weapon,
+	.spell {
+		position: relative;
+		width: 80px;
+		aspect-ratio: 1 / 1;
+		border-radius: 50%;
+		background-size: cover;
+		border: solid 4px brown;
+		transition: 0.05s linear scale;
+		/* padding: 0; */
+	}
+
+	.weapon:hover,
+	.spell:hover {
+		scale: 1.1;
+	}
+
+	.active {
+		outline: solid yellow 3px;
+	}
+
+	.disabled {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+	.exit {
+		position: absolute;
+		height: 50%;
+		aspect-ratio: 1 / 1;
+		right: -20%;
+		top: -20%;
+		border-radius: 50%;
+	}
 </style>

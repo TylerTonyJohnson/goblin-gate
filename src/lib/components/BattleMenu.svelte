@@ -1,12 +1,12 @@
 <script>
 	import { fly } from 'svelte/transition';
 
-	let { battleParameters = $bindable(), seed, resetBattle, createBattle } = $props();
+	let { battleParameters = $bindable(), seed, initializeBattle, createBattle } = $props();
 </script>
 
 <div class="frame" transition:fly={{ x: -200 }}>
 	<div class="button-container">
-		<button class="button green" onclick={resetBattle}>RESET</button>
+		<button class="button green" onclick={initializeBattle}>RESET</button>
 		<button class="button red" onclick={createBattle}>CREATE</button>
 		<!-- <button class="button blue">SAVE</button> -->
 	</div>
@@ -19,7 +19,7 @@
 			<div class="monster-weights">
 				<div class="count-container">
 					<label for="monster-count">Count</label>
-					<input class='monster-count' type="number" bind:value={battleParameters.monsterCount} />
+					<input class="monster-count" type="number" bind:value={battleParameters.monsterCount} />
 				</div>
 				{#each battleParameters.monsters as monsterWeight, index}
 					<div class="slider">
@@ -34,6 +34,32 @@
 						/>
 					</div>
 				{/each}
+			</div>
+		</div>
+		<div class="group">
+			<div class="label">CLUSTERING: {battleParameters.clustering}</div>
+			<div class="slider">
+				<input
+					type="range"
+					id="name1"
+					min="-1"
+					max="1"
+					bind:value={battleParameters.clustering}
+					step="0.1"
+				/>
+			</div>
+		</div>
+		<div class="group">
+			<div class="label">Obstacles: {battleParameters.clustering}</div>
+			<div class="slider">
+				<input
+					type="range"
+					id="name1"
+					min="-1"
+					max="1"
+					bind:value={battleParameters.clustering}
+					step="0.1"
+				/>
 			</div>
 		</div>
 	</div>
@@ -93,6 +119,12 @@
 		resize: none;
 		/* padding: 1rem; */
 		/* border-radius: 0.5rem; */
+	}
+
+	.slider-container {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 
 	.slider {

@@ -1,31 +1,85 @@
 <script>
 	import { fly } from 'svelte/transition';
 
-	let { attackCount } = $props();
+	import { getPlayer } from '$lib/classes/player.svelte';
+
+	let { attackCount, currentHealth, maxHealth } = $props();
+
+	const player = getPlayer();
+
+	const efficiency = $derived(
+		attackCount ? ((maxHealth - currentHealth) / attackCount).toFixed(2) : 0
+	);
 </script>
 
 <div class="frame" transition:fly={{ x: -200 }}>
-	<div class='attacks'>Attacks: {attackCount}</div>
+	<div class="group-container">
+		<div class="group">
+			<div class="label">Battle Stats</div>
+			<div class="data-container">
+				<div>Attack Count</div>
+				<div>{attackCount}</div>
+			</div>
+		</div>
+		<div class="group">
+			<div class="label">Battle Stats</div>
+			<div class="data-container">
+				<div>Total HP</div>
+				<div>{currentHealth} / {maxHealth}</div>
+			</div>
+			<div class="data-container">
+				<div>HP Per Attack</div>
+				<div>{efficiency}</div>
+			</div>
+			<div class="data-container">
+				<div>Endurance used</div>
+				<div>{player.currentEndurance}</div>
+			</div>
+			<div class="data-container">
+				<div>HP Per Attack</div>
+				<div>{efficiency}</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <style>
 	.frame {
-		display: grid;
-		grid-template-rows: auto 1fr auto;
+		display: flex;
+		flex-direction: column;
 		height: 100%;
+		/* max-width: 25vw; */
+		/* width: 100%; */
 		grid-area: left;
 		background-color: blue;
-		place-self: end end;
-		justify-content: space-between;
-		padding: 1.5rem;
+		justify-content: start;
 		border-radius: 1.5rem;
-        place-self: center end;
-		/* padding: 1rem; */
-
-		/* background-color: yellow; */
+		place-self: center end;
+		gap: 1rem;
+		padding: 1rem;
 	}
 
-	.attacks {
+	.group-container {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.label {
+		/* border: solid red 1px; */
 		color: white;
+		text-align: center;
+	}
+
+	.data-container {
+		display: flex;
+		min-width: 10rem;
+		/* flex-direction: column; */
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem;
+		gap: 1rem;
+		color: white;
+		border: solid 1px black;
 	}
 </style>

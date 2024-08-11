@@ -2,12 +2,14 @@
 	import '../app.css';
 
 	import { setPreferences } from '$lib/preferences.svelte';
-	import { AppStates, setAppState } from '$lib/appState.svelte';
+	import { setAppState } from '$lib/appState.svelte';
+	import { setPlayer } from '$lib/classes/player.svelte';
 	import Header from '../lib/components/Header.svelte';
 	import Footer from '../lib/components/Footer.svelte';
 
 	setPreferences();
 	setAppState();
+	setPlayer();
 </script>
 
 <div class="app">

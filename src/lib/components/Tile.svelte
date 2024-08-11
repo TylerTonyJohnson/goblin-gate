@@ -1,77 +1,72 @@
 <script>
-	import { fade, scale, fly } from 'svelte/transition';
+	import { scale, fly } from 'svelte/transition';
 	import { GemTypes } from '../enums.js';
 	import { getPreferences } from '$lib/preferences.svelte';
 
-	let { monsterData, attack } = $props();
+	let { monsterData, hover, unhover, attack, hovered, attached } = $props();
 
 	const preferences = getPreferences();
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-
-<div
+<button
 	class="frame"
+	onmouseenter={hover}
+	onmouseleave={unhover}
 	onclick={attack}
-	in:fly={{y: -500, duration: 1000}}
+	class:hovered
+	class:attached
+	in:fly={{ y: -500, duration: 1000 }}
 	out:scale
 	style={`
-		left: ${monsterData.coordinates.x * preferences.tileSize + preferences.tileGap * monsterData.coordinates.x}px; 
-		bottom: ${monsterData.coordinates.y * preferences.tileSize + preferences.tileGap * monsterData.coordinates.y}px;
+		left: ${monsterData.coordinates.x * preferences.tileSize}px; 
+		bottom: ${monsterData.coordinates.y * preferences.tileSize}px;
 		width: ${preferences.tileSize}px;
 		height: ${preferences.tileSize}px;
 	`}
 >
-	<div class="image" style={`background-image: url(${monsterData.type.source})`}></div>
-	<div class="health-bar">
-		{#each Array(monsterData.maxHealth) as heartToken, index}
-			{#if index < monsterData.currentHealth}
-				<img src={GemTypes.Green.source} class="health-segment" alt="gem" />
-			{:else}
-				<img src={GemTypes.Gray.source} class="health-segment" alt="gem" />
-			{/if}
-		{/each}
+	<div
+		class="image"
+		style={`
+			background-image: url(${monsterData.type.source});
+			inset: ${preferences.tileGap}px;
+			border: solid ${monsterData.type.theme} 3px;
+		`}
+	>
+		<div class="health-bar">
+			{#each Array(monsterData.maxHealth) as heartToken, index}
+				{#if index < monsterData.currentHealth}
+					<img src={GemTypes.Green.source} class="health-segment" alt="gem" />
+				{:else}
+					<img src={GemTypes.Gray.source} class="health-segment" alt="gem" />
+				{/if}
+			{/each}
+		</div>
 	</div>
-</div>
+</button>
 
 <style>
 	.frame {
 		position: absolute;
-		background-color: red;
+		background-color: transparent;
 
-		border-radius: 1rem;
-		overflow: hidden;
-		box-shadow:
-			4px 4px 8px #0008,
-			inset 8px 8px 8px #fff8,
-			inset -8px -8px 8px #0008;
-
+		border: none;
 		transition:
 			left 0.5s,
 			bottom 0.5s;
-		transition-delay: 0.5s;
-	}
-
-	.frame:hover {
-		scale: 1.1;
+		/* transition-delay: 0.5s; */
 	}
 
 	.image {
 		position: absolute;
-		width: 100%;
-		height: 100%;
-		background-color: pink;
+		background-color: red;
 		background-size: cover;
-	}
-
-	.debug {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		color: lime;
+		border-radius: 1rem;
+		overflow: hidden;
+		transition: scale linear 0.05s;
+		/* box-shadow:
+			4px 4px 8px #0008,
+			inset 8px 8px 8px #fff8,
+			inset -8px -8px 8px #0008; */
 	}
 
 	.health-bar {
@@ -93,5 +88,16 @@
 		height: 50%;
 		width: 12.5%;
 		/* background-color: yellow; */
+	}
+
+	.hovered > .image {
+		scale: 1.1;
+		/* inset: 0px; */
+		border: solid black 2px;
+	}
+	.attached {
+		/* transform: scale(1.1); */
+		/* outline: solid magenta 3px; */
+		background-color: lime;
 	}
 </style>
