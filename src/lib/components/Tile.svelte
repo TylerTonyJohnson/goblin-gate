@@ -3,7 +3,7 @@
 	import { GemTypes } from '../enums.js';
 	import { getPreferences } from '$lib/preferences.svelte';
 
-	let { monsterData, hover, unhover, attack, hovered, attached } = $props();
+	let { monsterData, hover, unhover, attack, hovered, attached, selected } = $props();
 
 	const preferences = getPreferences();
 </script>
@@ -15,6 +15,7 @@
 	onclick={attack}
 	class:hovered
 	class:attached
+	class:selected
 	in:fly={{ y: -500, duration: 1000 }}
 	out:scale
 	style={`
@@ -99,5 +100,11 @@
 		/* transform: scale(1.1); */
 		/* outline: solid magenta 3px; */
 		background-color: lime;
+	}
+
+	.selected {
+		transform: scale(1.1);
+		/* outline: solid magenta 3px; */
+		background-color: magenta;
 	}
 </style>

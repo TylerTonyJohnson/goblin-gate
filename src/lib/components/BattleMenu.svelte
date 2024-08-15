@@ -21,7 +21,7 @@
 					<label for="monster-count">Count</label>
 					<input class="monster-count" type="number" bind:value={battleParameters.monsterCount} />
 				</div>
-				{#each battleParameters.monsters as monsterWeight, index}
+				{#each battleParameters.monsterMapping as monsterWeight, index}
 					<div class="slider">
 						<label for="name1">{monsterWeight.type.name} {monsterWeight.weight}</label>
 						<input

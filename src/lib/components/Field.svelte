@@ -1,19 +1,18 @@
 <script>
 	import Tile from './Tile.svelte';
 	import { getPreferences } from '$lib/preferences.svelte';
-	import { AppStates, getAppState } from '$lib/appState.svelte';
 
 	let {
-		battleData,
+		monsterData,
 		battleParameters,
 		hover,
-		attack,
+		hit,
 		hitBox,
 		hoveredMonster,
-		attachedMonsters
+		attachedMonsters,
+		selectedMonsters
 	} = $props();
 
-	const appState = getAppState();
 	const preferences = getPreferences();
 </script>
 
@@ -22,14 +21,15 @@
 		class="monsters-grid"
 		style={`width: ${battleParameters.dimensions.x * preferences.tileSize}px;`}
 	>
-		{#each battleData as monsterData (monsterData.id)}
+		{#each monsterData as monster (monster.id)}
 			<Tile
-				{monsterData}
-				attack={() => attack(monsterData)}
-				hover={() => hover(monsterData)}
+				monsterData={monster}
+				attack={() => hit(monster)}
+				hover={() => hover(monster)}
 				unhover={() => hover(null)}
-				hovered={monsterData === hoveredMonster}
-				attached={attachedMonsters.includes(monsterData)}
+				hovered={monster === hoveredMonster}
+				selected={selectedMonsters.includes(monster)}
+				attached={attachedMonsters.includes(monster)}
 			/>
 		{/each}
 	</div>
