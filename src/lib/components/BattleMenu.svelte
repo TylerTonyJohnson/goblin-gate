@@ -1,13 +1,13 @@
 <script>
 	import { fly } from 'svelte/transition';
 
-	let { battleParameters = $bindable(), seed, initializeBattle, createBattle } = $props();
+	let { battleParameters = $bindable(), seed, resetBattle, newBattle } = $props();
 </script>
 
 <div class="frame" transition:fly={{ x: -200 }}>
 	<div class="button-container">
-		<button class="button green" onclick={initializeBattle}>RESET</button>
-		<button class="button red" onclick={createBattle}>CREATE</button>
+		<button class="button green" onclick={resetBattle}>RESET</button>
+		<button class="button red" onclick={newBattle}>CREATE</button>
 		<!-- <button class="button blue">SAVE</button> -->
 	</div>
 	<div class="seed-container">
@@ -30,35 +30,34 @@
 							min="0"
 							max="1"
 							bind:value={monsterWeight.weight}
-							step="0.1"
+							step="0.01"
 						/>
 					</div>
 				{/each}
 			</div>
 		</div>
 		<div class="group">
-			<div class="label">CLUSTERING: {battleParameters.clustering}</div>
+			<div class="label">Obstacles: {battleParameters.obstacleMapping}</div>
 			<div class="slider">
 				<input
 					type="range"
-					id="name1"
-					min="-1"
+					min="0"
 					max="1"
-					bind:value={battleParameters.clustering}
-					step="0.1"
+					bind:value={battleParameters.obstacleMapping}
+					step="0.01"
 				/>
 			</div>
 		</div>
 		<div class="group">
-			<div class="label">Obstacles: {battleParameters.clustering}</div>
+			<div class="label">Clustering: {battleParameters.clustering}</div>
 			<div class="slider">
 				<input
 					type="range"
-					id="name1"
+					disabled
 					min="-1"
 					max="1"
 					bind:value={battleParameters.clustering}
-					step="0.1"
+					step="0.01"
 				/>
 			</div>
 		</div>

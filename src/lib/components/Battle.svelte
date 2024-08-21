@@ -1,4 +1,5 @@
 <script>
+	import { browser } from '$app/environment';
 	import { fade } from 'svelte/transition';
 
 	import { AppStates, getAppState } from '$lib/appState.svelte';
@@ -26,21 +27,27 @@
 		dimensions: { x: 5, y: 7 }
 	};
 
-	let battleParameters = $state({
-		dimensions: { x: 5, y: 7 },
-		monsterCount: 50,
-		monsterMapping: [
-			{ type: MonsterTypes.Black, weight: 0.4 },
-			{ type: MonsterTypes.White, weight: 0.2 },
-			{ type: MonsterTypes.Yellow, weight: 0.1 },
-			{ type: MonsterTypes.Green, weight: 0.1 },
-			{ type: MonsterTypes.Blue, weight: 0.1 },
-			{ type: MonsterTypes.Red, weight: 0.1 }
-		],
-		clustering: 0,
-		fillCount: 20,
-		obstacles: []
-	});
+	let battleParameters = $state();
+
+	if (localStorage.getItem('battleParameters')) {
+		battleParameters = JSON.parse(localStorage.getItem('battleParameters'));
+	} else {
+		battleParameters = {
+			dimensions: { x: 5, y: 7 },
+			monsterCount: 40,
+			monsterMapping: [
+				{ type: MonsterTypes.Black, weight: 0.4 },
+				{ type: MonsterTypes.White, weight: 0.2 },
+				{ type: MonsterTypes.Yellow, weight: 0.1 },
+				{ type: MonsterTypes.Green, weight: 0.1 },
+				{ type: MonsterTypes.Blue, weight: 0.1 },
+				{ type: MonsterTypes.Red, weight: 0.1 }
+			],
+			clustering: 0,
+			fillCount: 20,
+			obstacleMapping: 0.15
+		};
+	}
 
 	// Seed
 
@@ -63,20 +70,25 @@
 	/* 
 		RUNTIME
 	*/
-	let { monsterData, getCluster, attackMonster, castMonster } = new Battle(battleParameters, seed);
+	let battle = $state();
+
+	resetBattle();
 
 	let attackCount = $state(0);
 	let maxHealth = 0;
 
 	const currentHealth = $derived(
-		monsterData.reduce((acc, monster) => {
+		battle.monsterData.reduce((acc, monster) => {
 			return acc + monster.currentHealth;
 		}, 0)
 	);
 
 	let hoveredMonster = $state();
 	let attachedMonsters = $derived(
-		getCluster(hoveredMonster, player.currentSpell ? player.currentSpell : player.currentWeapon)
+		battle.getCluster(
+			hoveredMonster,
+			player.currentSpell ? player.currentSpell : player.currentWeapon
+		)
 	);
 
 	let selectedMonsters = $state([]);
@@ -84,12 +96,13 @@
 	// <---------- INTERACTIONS ---------->
 
 	function resetBattle() {
-		({ monsterData, monsterPool, getCluster } = new Battle(battleParameters, seed));
+		battle = new Battle(battleParameters, seed);
 	}
 
 	function newBattle() {
 		germ = getRandomWord();
-		({ monsterData, getCluster } = createRandomBattle(battleParameters, seed));
+		saveSettings();
+		resetBattle();
 	}
 	function hover(monster) {
 		hoverMonster(monster);
@@ -99,6 +112,10 @@
 		hoveredMonster = monster;
 	}
 
+	function saveSettings() {
+		localStorage.setItem('battleParameters', JSON.stringify(battleParameters));
+	}
+
 	function hit(monster) {
 		selectedMonsters.push(monster);
 
@@ -106,35 +123,20 @@
 
 		// Cast or attack?
 		if (player.currentSpell) {
-			castMonster(selectedMonsters, player);
+			battle.castMonster(selectedMonsters, player);
 			player.changeSpell(null);
 		} else if (player.currentWeapon) {
-			attackMonster(selectedMonsters, player);
+			battle.attackMonster(selectedMonsters, player);
 		}
 
-		// Experience
-		if (appState.state === AppStates.Battle) {
-			const experience = calculateExperience(cluster);
-			player.addExperience(experience);
-		}
+		// // Experience
+		// if (appState.state === AppStates.Battle) {
+		// 	const experience = calculateExperience(cluster);
+		// 	player.addExperience(experience);
+		// }
 
 		// Reset
 		selectedMonsters = [];
-	}
-
-	function calculateExperience(cluster) {
-		// Get unique values
-		const killedMonsters = cluster.filter((monster) => monster.currentHealth < 1);
-		const monsterType = killedMonsters[0].type;
-
-		// For each unique value, calculate the count
-		let experience = 0;
-
-		if (killedMonsters.length >= monsterType.xpMinimum) {
-			experience += monsterType.xpCombo + killedMonsters.length * monsterType.xpDrop;
-		}
-
-		return experience;
 	}
 </script>
 
@@ -145,7 +147,8 @@
 
 <div class="frame" transition:fade>
 	<Field
-		{monsterData}
+		monsterData={battle.monsterData}
+		obstacleData={battle.obstacleData}
 		{battleParameters}
 		{hit}
 		{hover}

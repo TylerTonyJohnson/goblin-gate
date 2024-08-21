@@ -1,7 +1,7 @@
 import { getContext, setContext } from 'svelte';
 
 const preferences = $state({
-	tileSize: 90,
+	tileSize: 86,
 	tileGap: 4
 });
 

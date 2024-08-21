@@ -1,9 +1,11 @@
 <script>
-	import Tile from './Tile.svelte';
+	import Tile from '$lib/components/Tile.svelte';
+	import Obstacle from '$lib/components/Obstacle.svelte';
 	import { getPreferences } from '$lib/preferences.svelte';
 
 	let {
 		monsterData,
+		obstacleData,
 		battleParameters,
 		hover,
 		hit,
@@ -21,6 +23,9 @@
 		class="monsters-grid"
 		style={`width: ${battleParameters.dimensions.x * preferences.tileSize}px;`}
 	>
+		{#each obstacleData as obstacle (obstacle.id)}
+			<Obstacle obstacleData={obstacle} />
+		{/each}
 		{#each monsterData as monster (monster.id)}
 			<Tile
 				monsterData={monster}
@@ -33,7 +38,7 @@
 			/>
 		{/each}
 	</div>
-	<div class="hit-box" style={`height: ${hitBox.dimensions.y * preferences.tileSize}px;`}></div>
+	<div class="hit-box" style={`height: ${hitBox.dimensions.y * preferences.tileSize + 16}px;`}></div>
 </div>
 
 <style>
