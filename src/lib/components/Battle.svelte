@@ -164,7 +164,13 @@
 		<ExperienceBar />
 	{:else}
 		<BattleMenu bind:battleParameters {seed} {resetBattle} {newBattle} />
-		<RunMenu {attackCount} {hit} {currentHealth} {maxHealth} />
+		<RunMenu
+			attackCount={battle.stats.attackCount}
+			currentHealth={battle.stats.currentHealth}
+			maxHealth={battle.stats.maxHealth}
+			attackEfficiency={battle.stats.attackEfficiency}
+			experienceGained={battle.stats.experienceGained}
+		/>
 	{/if}
 	{#if player.currentEndurance < 1}
 		<Defeat />

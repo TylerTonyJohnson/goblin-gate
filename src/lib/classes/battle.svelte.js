@@ -5,6 +5,7 @@ export class Battle {
 	monsterPool = $state([]);
 	monsterData = $state([]);
 	obstacleData = $state([]);
+	stats = $state({});
 
 	constructor(battleParameters, seed) {
 		const { monsterCount, monsterMapping, dimensions, obstacleMapping } = { ...battleParameters };
@@ -16,15 +17,35 @@ export class Battle {
 
 		this.randomGenerator = seededGenerator(seed);
 		this.monsterPool = this.createMonsterPool();
-		this.maxHealth = this.monsterPool.reduce(
-			(acc, monster) => acc + monster.weight * monster.type.maxHealth,
-			0
-		);
+		this.setStats();
 
 		// Fill in as much of the monsterData as we need.
 		this.addRandomObstacles();
 		this.fillMonsterData();
+		this.updateStats();
 	}
+
+	setStats = () => {
+		this.stats = {
+			maxHealth: this.monsterPool.reduce(
+				(acc, monster) => acc + monster.weight * monster.type.maxHealth,
+				0
+			),
+			attackCount: 0,
+			attackEfficiency: 0,
+			experienceGained: 0
+		};
+	};
+
+	updateStats = () => {
+		this.stats.currentHealth =
+			this.monsterData.reduce((acc, monster) => acc + monster.currentHealth, 0) +
+			this.monsterPool.reduce((acc, monster) => acc + monster.weight * monster.type.maxHealth, 0);
+
+		this.stats.attackEfficiency = !this.stats.attackCount
+			? 0
+			: (this.stats.maxHealth - this.stats.currentHealth) / this.stats.attackCount;
+	};
 
 	createMonsterPool = () => {
 		// Normalize the mapping and sort it by smallest to largest category
@@ -297,7 +318,12 @@ export class Battle {
 			});
 		});
 
-		console.log("Killed monsters", killedMonsters);
+		this.stats.attackCount += 1;
+
+		if (killedMonsters.length > 0) {
+			this.stats.experienceGained += this.calculateExperience(killedMonsters);
+		}
+		this.updateStats();
 	};
 
 	calculateExperience = (cluster) => {

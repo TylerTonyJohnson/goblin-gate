@@ -3,13 +3,10 @@
 
 	import { getPlayer } from '$lib/classes/player.svelte';
 
-	let { attackCount, currentHealth, maxHealth } = $props();
+	let { attackCount, currentHealth, maxHealth, attackEfficiency, experienceGained } = $props();
 
 	const player = getPlayer();
 
-	const efficiency = $derived(
-		attackCount ? ((maxHealth - currentHealth) / attackCount).toFixed(2) : 0
-	);
 </script>
 
 <div class="frame" transition:fly={{ x: -200 }}>
@@ -29,15 +26,15 @@
 			</div>
 			<div class="data-container">
 				<div>HP Per Attack</div>
-				<div>{efficiency}</div>
+				<div>{attackEfficiency.toFixed(2)}</div>
 			</div>
-			<div class="data-container">
+			<!-- <div class="data-container">
 				<div>Endurance used</div>
 				<div>{player.currentEndurance}</div>
-			</div>
+			</div> -->
 			<div class="data-container">
-				<div>HP Per Attack</div>
-				<div>{efficiency}</div>
+				<div>Exp Gained</div>
+				<div>{experienceGained}</div>
 			</div>
 		</div>
 	</div>
