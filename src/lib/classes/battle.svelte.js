@@ -1,36 +1,53 @@
 import { seededGenerator } from '$lib/classes/random.svelte';
-import { ObstacleTypes } from '$lib/classes/obstacles.svelte';
+import { ObstacleTypes, getRandomObstacleMapping } from '$lib/classes/obstacles.svelte.js';
+import { TileTypes } from '$lib/classes/tiles.svelte';
+import { TreasureTypes } from '$lib/classes/treasure.svelte';
+import { VillagerTypes } from '$lib/classes/villagers.svelte';
 
 export class Battle {
-	monsterPool = $state([]);
-	monsterData = $state([]);
-	obstacleData = $state([]);
+	tilePool = $state([]);
+	tileData = $state([]);
 	stats = $state({});
 
 	constructor(battleParameters, seed) {
-		const { monsterCount, monsterMapping, dimensions, obstacleMapping } = { ...battleParameters };
+		const {
+			monsterCount,
+			monsterMapping,
+			dimensions,
+			obstacleMapping,
+			treasureMapping,
+			villagerMapping
+		} = {
+			...battleParameters
+		};
 
 		this.monsterCount = monsterCount;
 		this.monsterMapping = monsterMapping;
 		this.dimensions = dimensions;
 		this.obstacleMapping = obstacleMapping;
+		this.treasureMapping = treasureMapping;
+		this.villagerMapping = villagerMapping;
 
 		this.randomGenerator = seededGenerator(seed);
-		this.monsterPool = this.createMonsterPool();
+		this.tilePool = this.createTilePool();
+
+		// console.log(this.tilePool);
 		this.setStats();
 
 		// Fill in as much of the monsterData as we need.
 		this.addRandomObstacles();
-		this.fillMonsterData();
+		this.fillTileData();
 		this.updateStats();
 	}
 
 	setStats = () => {
+		const initialHealth = this.tilePool
+			.filter((tile) => tile.tileType === TileTypes.Monster)
+			.reduce((acc, monster) => acc + monster.weight * monster.type.maxHealth, 0);
+
 		this.stats = {
-			maxHealth: this.monsterPool.reduce(
-				(acc, monster) => acc + monster.weight * monster.type.maxHealth,
-				0
-			),
+			maxHealth: initialHealth,
+			currentHealth: initialHealth,
 			attackCount: 0,
 			attackEfficiency: 0,
 			experienceGained: 0
@@ -39,22 +56,30 @@ export class Battle {
 
 	updateStats = () => {
 		this.stats.currentHealth =
-			this.monsterData.reduce((acc, monster) => acc + monster.currentHealth, 0) +
-			this.monsterPool.reduce((acc, monster) => acc + monster.weight * monster.type.maxHealth, 0);
+			this.tileData
+				.filter((tile) => tile.tileType === TileTypes.Monster)
+				.reduce((acc, monster) => acc + monster.currentHealth, 0) +
+			this.tilePool
+				.filter((tile) => tile.tileType === TileTypes.Monster)
+				.reduce((acc, monster) => acc + monster.weight * monster.type.maxHealth, 0);
 
 		this.stats.attackEfficiency = !this.stats.attackCount
 			? 0
 			: (this.stats.maxHealth - this.stats.currentHealth) / this.stats.attackCount;
 	};
 
-	createMonsterPool = () => {
+	createTilePool = () => {
+		/* 
+			Monsters first
+		*/
+
 		// Normalize the mapping and sort it by smallest to largest category
 		const normalizedMapping = this.normalizeWeights(this.monsterMapping).sort(
 			(a, b) => a.weight - b.weight
 		);
 
 		// Calculate the number of monsters of each type
-		let monsterCounts = [];
+		let tileCounts = [];
 		for (let i = 0; i < normalizedMapping.length; i++) {
 			let count = Math.floor(this.monsterCount * normalizedMapping[i].weight);
 
@@ -62,55 +87,124 @@ export class Battle {
 
 			// Any remainder goes to the last (and largest) monster type
 			if (i < normalizedMapping.length - 1) {
-				monsterCounts.push({ type: normalizedMapping[i].type, weight: count });
+				tileCounts.push({
+					tileType: TileTypes.Monster,
+					type: normalizedMapping[i].type,
+					weight: count
+				});
 			} else {
 				const remainder =
-					this.monsterCount - monsterCounts.reduce((acc, monster) => acc + monster.weight, 0);
+					this.monsterCount - tileCounts.reduce((acc, monster) => acc + monster.weight, 0);
 
-				monsterCounts.push({ type: normalizedMapping[i].type, weight: remainder });
+				tileCounts.push({
+					tileType: TileTypes.Monster,
+					type: normalizedMapping[i].type,
+					weight: remainder
+				});
 			}
 		}
 
-		return monsterCounts;
+		/* 
+			Treasures next
+		*/
+		tileCounts.push({
+			tileType: TileTypes.Treasure,
+			type: TreasureTypes.Chest,
+			weight: this.treasureMapping
+		});
+
+		/* 
+			Villagers next
+		*/
+
+		tileCounts.push({
+			tileType: TileTypes.Villager,
+			type: VillagerTypes.Prisoner,
+			weight: this.villagerMapping
+		});
+
+		return tileCounts;
 	};
 
 	normalizeWeights = (mapping) => {
-		const total = mapping.reduce((acc, monster) => acc + monster.weight, 0);
+		const total = mapping.reduce((acc, tile) => acc + tile.weight, 0);
 
-		const normalizedMapping = mapping.map((monster) => ({
-			type: monster.type,
-			weight: monster.weight / total
+		const normalizedMapping = mapping.map((tile) => ({
+			tileType: tile?.tileType,
+			type: tile.type,
+			weight: tile.weight / total
 		}));
 
 		return normalizedMapping;
 	};
 
+	// Remap weights by adding them up
+	accumulateWeights = (normalizedMapping) => {
+		let cumulativeWeight = 0;
+		const cumulativeMapping = normalizedMapping.map((tile) => {
+			cumulativeWeight += tile.weight;
+			return { tileType: tile.tileType, type: tile.type, weight: cumulativeWeight };
+		});
+
+		return cumulativeMapping;
+	};
+
 	addRandomObstacles = () => {
-		// Specify where the obstacles can be placed
-		const range = {
-			width: this.dimensions.x,
-			height: this.dimensions.y - 1
+		// Check if the is any mapping
+		if (this.obstacleMapping.reduce((acc, obstacle) => acc + obstacle.weight, 0) <= 0) return;
+
+		// Get random obstacle type
+		const normalizedMapping = this.normalizeWeights(this.obstacleMapping);
+		const cumulativeMapping = this.accumulateWeights(normalizedMapping);
+		const randomValue = this.randomGenerator();
+
+		const obstacleType = cumulativeMapping.find((tile) => {
+			return randomValue <= tile.weight;
+		}).type;
+
+		// Get available size based on buffer
+		const bottom = obstacleType.buffer;
+		const top = this.dimensions.y - obstacleType.buffer;
+		const width = this.dimensions.x;
+		const height = top - bottom;
+
+		// Get random mapping
+		const obstacleMapping = getRandomObstacleMapping(this.randomGenerator());
+
+		const rows = obstacleMapping.split('\n').map((row) => row.replace(/\t/g, '').trim());
+
+		const mappingWidth = rows.reduce((acc, row) => (row.length > acc ? row.length : acc), 0);
+		const mappingHeight = rows.length;
+
+		// Get origin coordinates based on size of mapping
+		const originWidth = width - mappingWidth + 1;
+		const originHeight = height - mappingHeight + 1;
+
+		const origin = {
+			x: Math.floor(this.randomGenerator() * originWidth),
+			y: Math.floor(this.randomGenerator() * originHeight) + bottom
 		};
 
-		// Calculate the number of obstacles to place
-		const obstacleCount = Math.round(range.width * range.height * this.obstacleMapping);
+		// Turn the mapping into a list of coordinates
+		const obstacleList = [];
 
-		// Find suitable spaces to place obstacles
-		const emptySpaces = this.getObstacleSpaces();
-
-		// Place the obstacles in random suitable spaces
-		for (let i = 0; i < obstacleCount; i++) {
-			const emptySpace = emptySpaces.splice(
-				Math.floor(this.randomGenerator() * emptySpaces.length),
-				1
-			)[0];
-
-			this.obstacleData.push({
-				id: crypto.randomUUID(),
-				coordinates: emptySpace,
-				type: ObstacleTypes.Rock
-			});
+		for (let i = 0; i < mappingWidth; i++) {
+			for (let j = 0; j < mappingHeight; j++) {
+				if (rows[j][i] === 'x') {
+					obstacleList.push({ x: i + origin.x, y: j + origin.y });
+				}
+			}
 		}
+
+		// Place the obstacles in the tileData
+		obstacleList.forEach((obstacle) => {
+			this.tileData.push({
+				id: crypto.randomUUID(),
+				coordinates: { x: obstacle.x, y: obstacle.y },
+				tileType: TileTypes.Obstacle,
+				type: obstacleType
+			});
+		});
 	};
 
 	getObstacleSpaces = () => {
@@ -127,9 +221,9 @@ export class Battle {
 		return emptySpaces;
 	};
 
-	fillMonsterData = () => {
+	fillTileData = () => {
 		// Check if there are any monsters left to spawn
-		if (this.monsterPool.reduce((acc, monster) => acc + monster.weight, 0) < 1) return;
+		if (this.tilePool.reduce((acc, tile) => acc + tile.weight, 0) < 1) return;
 
 		// Find spawn spaces
 		const spawnSpaces = this.getSpawnSpaces();
@@ -139,13 +233,13 @@ export class Battle {
 		// For each empty space, create a monster
 		spawnSpaces.forEach((emptySpace) => {
 			// Check if there are any monsters left to spawn
-			if (this.monsterPool.reduce((acc, monster) => acc + monster.weight, 0) < 1) return;
-			this.addRandomMonster(emptySpace);
+			if (this.tilePool.reduce((acc, tile) => acc + tile.weight, 0) < 1) return;
+			this.addTileFromPool(emptySpace);
 		});
 
 		this.shoveDown();
 
-		this.fillMonsterData();
+		this.fillTileData();
 	};
 
 	getSpawnSpaces = () => {
@@ -154,11 +248,8 @@ export class Battle {
 		for (let i = 0; i < this.dimensions.x; i++) {
 			const space = { x: i, y: this.dimensions.y - 1 };
 			if (
-				!this.monsterData.some(
+				!this.tileData.some(
 					(monster) => monster.coordinates.x === space.x && monster.coordinates.y === space.y
-				) &&
-				!this.obstacleData.some(
-					(obstacle) => obstacle.coordinates.x === space.x && obstacle.coordinates.y === space.y
 				)
 			) {
 				emptySpaces.push(space);
@@ -168,136 +259,78 @@ export class Battle {
 		return emptySpaces;
 	};
 
-	getEmptySpaces = () => {
-		const emptySpaces = [];
+	addTileFromPool = (spawnSpace) => {
+		// Calculate where the tile will land
+		const landingSpace = this.getLandingSpace(spawnSpace);
 
-		for (let i = 0; i < this.dimensions.y; i++) {
-			for (let j = 0; j < this.dimensions.x; j++) {
-				const space = { x: j, y: i };
+		// Based on adjacency, get random tile from pool
+		const tileFromPool = this.getTileFromPool();
 
-				if (
-					!this.monsterData.some(
-						(monster) => monster.coordinates.x === space.x && monster.coordinates.y === space.y
-					) &&
-					!this.obstacleData.some(
-						(obstacle) => obstacle.coordinates.x === space.x && obstacle.coordinates.y === space.y
-					)
-				) {
-					emptySpaces.push(space);
-				}
-			}
-		}
+		// console.log(tileFromPool);
 
-		return emptySpaces;
+		// Initialize the tile
+		const initializedTile = this.initializeTile(tileFromPool, spawnSpace);
+
+		// Decrement the weight of the tile in the pool
+		this.tilePool.find(
+			(tile) => tile.tileType === initializedTile.tileType && tile.type === initializedTile.type
+		).weight -= 1;
+
+		// Add the tile to the tileData
+		this.tileData.push(initializedTile);
 	};
 
-	addRandomMonster = (emptySpace) => {
-		// Get next monster type
-		const monsterType = this.getNextMonsterType();
-
-		// Initialize monster
-		const initializedMonster = this.initializeMonster(monsterType, emptySpace);
-		this.monsterData.push(initializedMonster);
-
-		// Decrement monster count
-		this.monsterPool.find((monster) => monster.type === monsterType).weight -= 1;
-	};
-
-	getNextMonsterType = () => {
+	getTileFromPool = () => {
 		// Accumulate weights
 		let cumulativeWeight = 0;
 
-		const monsterWeights = this.normalizeWeights(
-			this.monsterPool.filter((monster) => monster.weight > 0)
-		);
+		const tileWeights = this.normalizeWeights(this.tilePool.filter((tile) => tile.weight > 0));
 
-		const cumulativeMapping = monsterWeights.map((monster) => {
-			cumulativeWeight += monster.weight;
-			return { type: monster.type, weight: cumulativeWeight };
+		const cumulativeMapping = tileWeights.map((tile) => {
+			cumulativeWeight += tile.weight;
+			return { tileType: tile.tileType, type: tile.type, weight: cumulativeWeight };
 		});
 
-		// Find the monster type that corresponds to the random value
-		const monsterType = cumulativeMapping.find((monster) => {
-			return this.randomGenerator() <= monster.weight;
-		}).type;
+		// Find the tile type that corresponds to the random value
+		const newTile = cumulativeMapping.find((tile) => {
+			return this.randomGenerator() <= tile.weight;
+		});
 
-		return monsterType;
+		return newTile;
 	};
 
-	initializeMonster = (monsterType, emptySpace) => {
+	initializeTile = (tile, spawnSpace) => {
+		// Initialize monster data
+		return {
+			id: crypto.randomUUID(),
+			coordinates: spawnSpace,
+			tileType: tile.tileType,
+			type: tile.type,
+			...(tile.tileType === TileTypes.Monster
+				? {
+						maxHealth: tile.type.maxHealth,
+						currentHealth: tile.type.maxHealth
+					}
+				: {})
+		};
+	};
+
+	initializeObstacle = (monsterType, emptySpace) => {
 		// Initialize monster data
 		return {
 			id: crypto.randomUUID(),
 			coordinates: emptySpace,
-			type: monsterType,
-			maxHealth: monsterType.maxHealth,
-			currentHealth: monsterType.maxHealth
+			type: monsterType
 		};
 	};
 
-	getCluster = (monster, weapon) => {
-		// Validation
-		if (!monster || !weapon) return [];
-
-		//Initialize
-		const visited = new Set();
-		const cluster = [];
-
-		const traverse = (currentMonster) => {
-			if (!this.isInHitbox(currentMonster)) return;
-
-			visited.add(currentMonster);
-			cluster.push(currentMonster);
-
-			// Check all adjacent monsters
-			let adjacentMonsters = this.getAdjacentMonsters(currentMonster);
-
-			adjacentMonsters.forEach((adjacentMonster) => {
-				// Filter out invalid monsters
-				if (visited.has(adjacentMonster)) return;
-				if (adjacentMonster.type !== currentMonster.type) return;
-				if (!this.isInHitbox(adjacentMonster)) return;
-				if (this.getDistance(monster, adjacentMonster) > weapon.range) return;
-
-				traverse(adjacentMonster);
-			});
+	initializeTreasure = (monsterType, emptySpace) => {
+		// Initialize monster data
+		return {
+			id: crypto.randomUUID(),
+			coordinates: emptySpace,
+			type: monsterType
 		};
-
-		// Start the traversal
-		traverse(monster);
-
-		return cluster;
-	};
-
-	isInHitbox = (monster) => {
-		return (
-			monster.coordinates.x >= 0 &&
-			monster.coordinates.x < this.dimensions.x &&
-			monster.coordinates.y >= 0 &&
-			monster.coordinates.y < this.dimensions.y
-		);
-	};
-
-	getAdjacentMonsters = (monster) => {
-		return this.monsterData.filter((otherMonster) => {
-			return (
-				(Math.abs(monster.coordinates.x - otherMonster.coordinates.x) === 1 &&
-					Math.abs(monster.coordinates.y - otherMonster.coordinates.y) === 0) ||
-				(Math.abs(monster.coordinates.x - otherMonster.coordinates.x) === 0 &&
-					Math.abs(monster.coordinates.y - otherMonster.coordinates.y) === 1)
-			);
-		});
-	};
-
-	getDistance = (monster, otherMonster) => {
-		return Math.sqrt(
-			Math.pow(Math.abs(monster.coordinates.x - otherMonster.coordinates.x), 2) +
-				Math.pow(Math.abs(monster.coordinates.y - otherMonster.coordinates.y), 2)
-		);
-	};
-
-	castMonster = (monsters, player) => {
-		player.currentSpell.cast(monsters);
 	};
 
 	attackMonster = (monsters, player) => {
@@ -313,12 +346,11 @@ export class Battle {
 
 			// Do the damage
 			cluster.forEach((clusterMonster) => {
-				const killedMonster = this.damageMonster(clusterMonster, player.currentWeapon.damage);
+				const killedMonster = this.damageMonsters(clusterMonster, player.currentWeapon.damage);
 				if (killedMonster) killedMonsters.push(killedMonster);
 			});
+			this.stats.attackCount += 1;
 		});
-
-		this.stats.attackCount += 1;
 
 		if (killedMonsters.length > 0) {
 			this.stats.experienceGained += this.calculateExperience(killedMonsters);
@@ -326,83 +358,70 @@ export class Battle {
 		this.updateStats();
 	};
 
-	calculateExperience = (cluster) => {
-		// Get unique values
-		const killedMonsters = cluster.filter((monster) => monster.currentHealth < 1);
-		const monsterType = killedMonsters[0].type;
-
+	calculateExperience = (killedMonsters) => {
 		// For each unique value, calculate the count
-		let experience = 0;
-
-		if (killedMonsters.length >= monsterType.xpMinimum) {
-			experience += monsterType.xpCombo + killedMonsters.length * monsterType.xpDrop;
-		}
+		const experience = killedMonsters.reduce((acc, monster) => acc + monster.type.xpDrop, 0);
 
 		return experience;
 	};
 
-	damageMonster = (monster, damage) => {
-		monster.currentHealth = Math.max(monster.currentHealth - damage, 0);
-		if (monster.currentHealth < 1) {
-			this.killMonster(monster);
-			return monster;
-		}
+	damageMonsters = (monsters, damage) => {
+		const killedMonsters = [];
+		monsters.forEach((monster) => {
+			monster.currentHealth = Math.max(monster.currentHealth - damage, 0);
+			if (monster.currentHealth < 1) {
+				this.killMonsters(monster);
+				killedMonsters.push(monster);
+			}
+		});
+		return killedMonsters;
 	};
 
-	killMonster = (monster) => {
-		this.removeMonster(monster);
+	killMonsters = (monsters) => {
+		// console.log('Killing monsters', monsters);
+		monsters.forEach((monster) => {
+			// console.log('Killing monster', monster);
+			const index = this.tileData.indexOf(monster);
+
+			this.tileData.splice(index, 1);
+		});
+
 		this.shoveDown();
-		this.fillMonsterData();
-	};
-
-	removeMonster = (monster) => {
-		this.monsterData.splice(this.monsterData.indexOf(monster), 1);
+		this.fillTileData();
 	};
 
 	shoveDown = () => {
 		// For each column, starting from the bottom, check if there's room to move down
 		for (let i = 0; i < this.dimensions.x; i++) {
 			for (let j = 0; j < this.dimensions.y; j++) {
-				// Check if there's a monster at this location
-
-				const monster = this.monsterData.find((monster) => {
-					// console.log(i, j, '-', monster.coordinates.x, monster.coordinates.y);
-					return monster.coordinates.x === i && monster.coordinates.y === j;
+				// Check if there's a tile at this location
+				const tile = this.tileData.find((tile) => {
+					return tile.coordinates.x === i && tile.coordinates.y === j;
 				});
 
-				if (!monster) continue;
+				if (!tile || tile.tileType === TileTypes.Obstacle) continue;
 
 				// Find the next empty space
-				const targetSpace = this.getAdvanceTarget(monster);
+				const targetSpace = this.getLandingSpace(tile.coordinates);
 
 				if (!targetSpace) continue;
 
-				monster.coordinates = targetSpace;
+				tile.coordinates = targetSpace;
 			}
 		}
 	};
 
-	getAdvanceTarget(monster) {
+	getLandingSpace(space) {
 		let furthestEmptySpace = null;
 
 		// Iteratively check the next space until the furthest one is found
-		for (let i = monster.coordinates.y - 1; i >= 0; i--) {
-			const isMonsterThere = this.monsterData.some(
-				(otherMonster) =>
-					otherMonster.coordinates.x === monster.coordinates.x && otherMonster.coordinates.y === i
-			);
-
-			const isObstacleThere = this.obstacleData.some(
-				(obstacle) =>
-					obstacle.coordinates.x === monster.coordinates.x && obstacle.coordinates.y === i
+		for (let i = space.y - 1; i >= 0; i--) {
+			const isTileOccupied = this.tileData.some(
+				(tile) => tile.coordinates.x === space.x && tile.coordinates.y === i
 			);
 
 			// If there's no monster or obstacle, this is the furthest empty space
-			if (!isMonsterThere && !isObstacleThere) {
-				furthestEmptySpace = { x: monster.coordinates.x, y: i };
-			}
-
-			if (isMonsterThere) return furthestEmptySpace;
+			if (!isTileOccupied) furthestEmptySpace = { x: space.x, y: i };
 		}
 		return furthestEmptySpace;
 	}

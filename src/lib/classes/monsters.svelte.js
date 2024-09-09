@@ -14,6 +14,7 @@ export class MonsterTypes {
 		this.xpDrop = type.xpDrop;
 		this.xpCombo = type.xpCombo;
 		this.theme = type.theme;
+		this.size = type.size;
 	}
 	static Black = new MonsterTypes({
 		name: 'Black',
@@ -22,7 +23,11 @@ export class MonsterTypes {
 		xpMinimum: 5,
 		xpDrop: 1,
 		xpCombo: 1,
-		theme: 'dimgray'
+		theme: 'dimgray',
+		size: {
+			x: 1,
+			y: 1
+		}
 	});
 	static White = new MonsterTypes({
 		name: 'White',
@@ -31,42 +36,62 @@ export class MonsterTypes {
 		xpMinimum: 5,
 		xpDrop: 1,
 		xpCombo: 1,
-		theme: 'lightgray'
+		theme: 'lightgray',
+		size: {
+			x: 1,
+			y: 1
+		}
 	});
 	static Yellow = new MonsterTypes({
 		name: 'Yellow',
 		source: profileYellow,
-		maxHealth: 2,
+		maxHealth: 1,
 		xpMinimum: 4,
 		xpDrop: 1,
 		xpCombo: 2,
-		theme: 'yellow'
+		theme: 'yellow',
+		size: {
+			x: 1,
+			y: 1
+		}
 	});
 	static Green = new MonsterTypes({
 		name: 'Green',
 		source: profileGreen,
-		maxHealth: 3,
+		maxHealth: 1,
 		xpMinimum: 3,
 		xpDrop: 1,
 		xpCombo: 2,
-		theme: 'green'
+		theme: 'green',
+		size: {
+			x: 1,
+			y: 1
+		}
 	});
 	static Blue = new MonsterTypes({
 		name: 'Blue',
 		source: profileBlue,
-		maxHealth: 4,
+		maxHealth: 1,
 		xpMinimum: 2,
 		xpDrop: 1,
 		xpCombo: 3,
-		theme: 'blue'
+		theme: 'blue',
+		size: {
+			x: 1,
+			y: 1
+		}
 	});
 	static Red = new MonsterTypes({
 		name: 'Red',
 		source: profileRed,
-		maxHealth: 5,
+		maxHealth: 1,
 		xpMinimum: 2,
 		xpDrop: 1,
 		xpCombo: 3,
-		theme: 'red'
+		theme: 'red',
+		size: {
+			x: 1,
+			y: 1
+		}
 	});
 }

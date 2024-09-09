@@ -1,9 +1,10 @@
 <script>
 	import { fly } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
 
 	import { getPlayer } from '$lib/classes/player.svelte';
 
-	let { attackCount, currentHealth, maxHealth, attackEfficiency, experienceGained } = $props();
+	let { stats, pool } = $props();
 
 	const player = getPlayer();
 
@@ -15,27 +16,33 @@
 			<div class="label">Battle Stats</div>
 			<div class="data-container">
 				<div>Attack Count</div>
-				<div>{attackCount}</div>
+				<div>{stats.attackCount}</div>
 			</div>
 		</div>
 		<div class="group">
 			<div class="label">Battle Stats</div>
 			<div class="data-container">
 				<div>Total HP</div>
-				<div>{currentHealth} / {maxHealth}</div>
+				<div>{stats.currentHealth} / {stats.maxHealth}</div>
 			</div>
 			<div class="data-container">
 				<div>HP Per Attack</div>
-				<div>{attackEfficiency.toFixed(2)}</div>
+				<div>{stats.attackEfficiency.toFixed(2)}</div>
 			</div>
-			<!-- <div class="data-container">
-				<div>Endurance used</div>
-				<div>{player.currentEndurance}</div>
-			</div> -->
 			<div class="data-container">
 				<div>Exp Gained</div>
-				<div>{experienceGained}</div>
+				<div>{stats.experienceGained}</div>
 			</div>
+		</div>
+		<div class="group">
+			<div class="label">Remaining</div>
+			{#each pool.sort( (a, b) => b.weight - a.weight) as item (item)}
+				<div class="data-container" animate:flip>
+					<img class='img' src={item.type.source} alt="pool">
+					<div>{item.type.name}</div>
+					<div>{item.weight}</div>
+				</div>
+			{/each}
 		</div>
 	</div>
 </div>
@@ -78,5 +85,10 @@
 		gap: 1rem;
 		color: white;
 		border: solid 1px black;
+	}
+
+	.img {
+		width: 2rem;
+		height: 2rem;
 	}
 </style>

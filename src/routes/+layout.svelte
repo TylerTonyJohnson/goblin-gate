@@ -26,8 +26,8 @@
 		grid-template-areas: 'header' 'main' 'footer';
 		/* flex-direction: column; */
 		grid-template-rows: auto 1fr auto;
-		max-width: 100vw;
-		min-height: 100vh;
+		width: 100vw;
+		height: 100vh;
 		background-position: center;
 		background-size: cover;
 	}

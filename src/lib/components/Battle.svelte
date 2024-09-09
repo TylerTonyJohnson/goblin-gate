@@ -1,12 +1,11 @@
 <script>
-	import { browser } from '$app/environment';
 	import { fade } from 'svelte/transition';
 
 	import { AppStates, getAppState } from '$lib/appState.svelte';
 	import { getPlayer } from '$lib/classes/player.svelte';
+	import { getPreferences } from '$lib/preferences.svelte';
 	import { Battle } from '$lib/classes/battle.svelte.js';
 	import { getRandomWord } from '$lib/classes/random.svelte';
-	import { MonsterTypes } from '$lib/classes/monsters.svelte.js';
 
 	import Bench from '$lib/components/Bench.svelte';
 	import EnduranceBar from '$lib/components/EnduranceBar.svelte';
@@ -18,35 +17,18 @@
 
 	const appState = getAppState();
 	const player = getPlayer();
+	const preferences = getPreferences();
 
 	/* 
 		Battle Data
 	*/
-	const hitBox = {
-		coordinates: { x: 0, y: 0 },
-		dimensions: { x: 5, y: 7 }
-	};
-
 	let battleParameters = $state();
 
+	// Load preferences
 	if (localStorage.getItem('battleParameters')) {
 		battleParameters = JSON.parse(localStorage.getItem('battleParameters'));
 	} else {
-		battleParameters = {
-			dimensions: { x: 5, y: 7 },
-			monsterCount: 40,
-			monsterMapping: [
-				{ type: MonsterTypes.Black, weight: 0.4 },
-				{ type: MonsterTypes.White, weight: 0.2 },
-				{ type: MonsterTypes.Yellow, weight: 0.1 },
-				{ type: MonsterTypes.Green, weight: 0.1 },
-				{ type: MonsterTypes.Blue, weight: 0.1 },
-				{ type: MonsterTypes.Red, weight: 0.1 }
-			],
-			clustering: 0,
-			fillCount: 20,
-			obstacleMapping: 0.15
-		};
+		battleParameters = preferences.defaultBattleParameters;
 	}
 
 	// Seed
@@ -74,29 +56,20 @@
 
 	resetBattle();
 
-	let attackCount = $state(0);
-	let maxHealth = 0;
+	let hoveredTile = $state();
+	let attachedTiles = $derived(player.currentTool.getTargets(hoveredTile, battle.tileData));
 
-	const currentHealth = $derived(
-		battle.monsterData.reduce((acc, monster) => {
-			return acc + monster.currentHealth;
-		}, 0)
+	let selectableTiles = $derived(
+		battle.tileData.filter((tile) => player.currentTool.targetTypes.includes(tile.tileType))
 	);
 
-	let hoveredMonster = $state();
-	let attachedMonsters = $derived(
-		battle.getCluster(
-			hoveredMonster,
-			player.currentSpell ? player.currentSpell : player.currentWeapon
-		)
-	);
-
-	let selectedMonsters = $state([]);
+	let selectedTiles = $state([]);
 
 	// <---------- INTERACTIONS ---------->
 
 	function resetBattle() {
 		battle = new Battle(battleParameters, seed);
+		player.resetForBattle();
 	}
 
 	function newBattle() {
@@ -104,39 +77,30 @@
 		saveSettings();
 		resetBattle();
 	}
-	function hover(monster) {
-		hoverMonster(monster);
-	}
-
-	function hoverMonster(monster) {
-		hoveredMonster = monster;
+	function hover(tile) {
+		hoveredTile = tile;
 	}
 
 	function saveSettings() {
 		localStorage.setItem('battleParameters', JSON.stringify(battleParameters));
 	}
 
-	function hit(monster) {
-		selectedMonsters.push(monster);
+	function hit(tile) {
+		// Get targets
+		const targets = player.currentTool.getTargets(tile, battle.tileData);
 
-		if (selectedMonsters.length < player.currentTool.targets) return;
+		// Hit targets and get killed monsters
+		const killedMonsters = player.currentTool.hit(targets);
+		if (killedMonsters) {
+			battle.killMonsters(killedMonsters);
 
-		// Cast or attack?
-		if (player.currentSpell) {
-			battle.castMonster(selectedMonsters, player);
-			player.changeSpell(null);
-		} else if (player.currentWeapon) {
-			battle.attackMonster(selectedMonsters, player);
+			// Experience
+			const experience = battle.calculateExperience(killedMonsters);
+			if (experience) player.addExperience(experience);
 		}
 
-		// // Experience
-		// if (appState.state === AppStates.Battle) {
-		// 	const experience = calculateExperience(cluster);
-		// 	player.addExperience(experience);
-		// }
-
-		// Reset
-		selectedMonsters = [];
+		// Update player
+		player.hit(player.currentTool);
 	}
 </script>
 
@@ -147,15 +111,15 @@
 
 <div class="frame" transition:fade>
 	<Field
-		monsterData={battle.monsterData}
+		tileData={battle.tileData}
 		obstacleData={battle.obstacleData}
 		{battleParameters}
 		{hit}
 		{hover}
-		{hitBox}
-		{hoveredMonster}
-		{attachedMonsters}
-		{selectedMonsters}
+		{hoveredTile}
+		{attachedTiles}
+		{selectableTiles}
+		{selectedTiles}
 	/>
 	<Bench />
 
@@ -164,13 +128,7 @@
 		<ExperienceBar />
 	{:else}
 		<BattleMenu bind:battleParameters {seed} {resetBattle} {newBattle} />
-		<RunMenu
-			attackCount={battle.stats.attackCount}
-			currentHealth={battle.stats.currentHealth}
-			maxHealth={battle.stats.maxHealth}
-			attackEfficiency={battle.stats.attackEfficiency}
-			experienceGained={battle.stats.experienceGained}
-		/>
+		<RunMenu stats={battle.stats} pool={battle.tilePool} />
 	{/if}
 	{#if player.currentEndurance < 1}
 		<Defeat />
@@ -180,7 +138,7 @@
 <style>
 	.frame {
 		position: relative;
-		height: 100%;
+		max-height: 100%;
 		display: grid;
 		grid-template-columns: 1fr auto 1fr;
 		grid-template-rows: auto 1fr auto;
@@ -190,5 +148,6 @@
 			'bench 	bench   bench';
 		padding: 1rem;
 		gap: 1rem;
+		/* background-color: teal; */
 	}
 </style>

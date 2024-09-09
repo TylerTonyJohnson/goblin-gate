@@ -1,11 +1,20 @@
 <script>
 	import { scale, fly } from 'svelte/transition';
-	import { GemTypes } from '../enums.js';
 	import { getPreferences } from '$lib/preferences.svelte';
+	import Monster from '$lib/components/Monster.svelte';
+	import Obstacle from '$lib/components/Obstacle.svelte';
+	import Treasure from '$lib/components/Treasure.svelte';
+	import Villager from '$lib/components/Villager.svelte';
 
-	let { monsterData, hover, unhover, attack, hovered, attached, selected } = $props();
+	import { TileTypes } from '$lib/classes/tiles.svelte';
+
+	let { tileData, hover, unhover, attack, hovered, attached, selectable, selected } = $props();
 
 	const preferences = getPreferences();
+
+	// const duration = tileData.tileType === TileTypes.Obstacle ? 0 : 1000;
+
+	// $inspect(tileData);
 </script>
 
 <button
@@ -16,32 +25,33 @@
 	class:hovered
 	class:attached
 	class:selected
-	in:fly={{ y: -500, duration: 1000 }}
+	class:selectable
+	in:fly={{ y: -500, duration: 500 }}
 	out:scale
 	style={`
-		left: ${monsterData.coordinates.x * preferences.tileSize}px; 
-		bottom: ${monsterData.coordinates.y * preferences.tileSize}px;
-		width: ${preferences.tileSize}px;
-		height: ${preferences.tileSize}px;
+		left: ${tileData.coordinates.x * preferences.tileSize}px; 
+		bottom: ${tileData.coordinates.y * preferences.tileSize}px;
+		width: ${preferences.tileSize * tileData.type.size.x}px;
+		height: ${preferences.tileSize * tileData.type.size.y}px;
 	`}
 >
 	<div
-		class="image"
+		class="tile-contents"
+		class:top={tileData.type.size.y > 1}
 		style={`
-			background-image: url(${monsterData.type.source});
-			inset: ${preferences.tileGap}px;
-			border: solid ${monsterData.type.theme} 3px;
-		`}
+		inset: ${preferences.tileGap}px;
+		border-color: ${tileData.tileType.theme};
+	`}
 	>
-		<div class="health-bar">
-			{#each Array(monsterData.maxHealth) as heartToken, index}
-				{#if index < monsterData.currentHealth}
-					<img src={GemTypes.Green.source} class="health-segment" alt="gem" />
-				{:else}
-					<img src={GemTypes.Gray.source} class="health-segment" alt="gem" />
-				{/if}
-			{/each}
-		</div>
+		{#if tileData.tileType === TileTypes.Obstacle}
+			<Obstacle obstacleData={tileData} />
+		{:else if tileData.tileType === TileTypes.Monster}
+			<Monster monsterData={tileData} />
+		{:else if tileData.tileType === TileTypes.Treasure}
+			<Treasure treasureData={tileData} />
+		{:else if tileData.tileType === TileTypes.Villager}
+			<Villager villagerData={tileData} />
+		{/if}
 	</div>
 </button>
 
@@ -51,50 +61,34 @@
 		background-color: transparent;
 
 		border: none;
+		background-size: cover;
 		transition:
 			left 0.5s,
 			bottom 0.5s;
 		/* transition-delay: 0.5s; */
 	}
 
-	.image {
+	.tile-contents {
 		position: absolute;
-		background-color: red;
-		background-size: cover;
+		display: grid;
+		place-items: center;
+		transition: scale linear 0.05s;
 		border-radius: 1rem;
 		overflow: hidden;
-		transition: scale linear 0.05s;
-		/* box-shadow:
-			4px 4px 8px #0008,
-			inset 8px 8px 8px #fff8,
-			inset -8px -8px 8px #0008; */
+		border-width: 5px;
+		border-style: solid;
+		z-index: 1;
+		/* background-color: teal; */
 	}
 
-	.health-bar {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		width: 100%;
-		height: 25%;
-
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 2px;
-
-		background-image: linear-gradient(to top, white, transparent);
+	.selectable {
+		/* background-color: orange; */
 	}
 
-	.health-segment {
-		height: 50%;
-		width: 12.5%;
-		/* background-color: yellow; */
-	}
-
-	.hovered > .image {
+	.hovered > .tile-contents {
 		scale: 1.1;
 		/* inset: 0px; */
-		border: solid black 2px;
+		/* border: solid black 2px; */
 	}
 	.attached {
 		/* transform: scale(1.1); */
@@ -106,5 +100,9 @@
 		transform: scale(1.1);
 		/* outline: solid magenta 3px; */
 		background-color: magenta;
+	}
+
+	.top {
+		z-index: 2;
 	}
 </style>

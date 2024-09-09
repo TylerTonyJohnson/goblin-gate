@@ -1,18 +1,16 @@
 <script>
 	import Tile from '$lib/components/Tile.svelte';
-	import Obstacle from '$lib/components/Obstacle.svelte';
 	import { getPreferences } from '$lib/preferences.svelte';
 
 	let {
-		monsterData,
-		obstacleData,
+		tileData,
 		battleParameters,
 		hover,
 		hit,
-		hitBox,
-		hoveredMonster,
-		attachedMonsters,
-		selectedMonsters
+		hoveredTile,
+		attachedTiles,
+		selectableTiles,
+		selectedTiles
 	} = $props();
 
 	const preferences = getPreferences();
@@ -23,22 +21,19 @@
 		class="monsters-grid"
 		style={`width: ${battleParameters.dimensions.x * preferences.tileSize}px;`}
 	>
-		{#each obstacleData as obstacle (obstacle.id)}
-			<Obstacle obstacleData={obstacle} />
-		{/each}
-		{#each monsterData as monster (monster.id)}
+		{#each tileData as tile (tile.id)}
 			<Tile
-				monsterData={monster}
-				attack={() => hit(monster)}
-				hover={() => hover(monster)}
+				tileData={tile}
+				attack={() => hit(tile)}
+				hover={() => hover(tile)}
 				unhover={() => hover(null)}
-				hovered={monster === hoveredMonster}
-				selected={selectedMonsters.includes(monster)}
-				attached={attachedMonsters.includes(monster)}
+				hovered={tile === hoveredTile}
+				attached={attachedTiles.includes(tile)}
+				selectable={selectableTiles.includes(tile)}
+				selected={selectedTiles.includes(tile)}
 			/>
 		{/each}
 	</div>
-	<div class="hit-box" style={`height: ${hitBox.dimensions.y * preferences.tileSize + 16}px;`}></div>
 </div>
 
 <style>
@@ -64,16 +59,5 @@
 		/* border: solid purple 4px; */
 		/* bottom: 0; */
 		/* background-color: red; */
-	}
-
-	.hit-box {
-		position: absolute;
-		left: 0.5rem;
-		bottom: 0.5rem;
-		width: calc(100% - 1rem);
-
-		border: solid rgb(255, 64, 220) 5px;
-		border-radius: 1.5rem;
-		pointer-events: none;
 	}
 </style>

@@ -16,7 +16,6 @@
 
 	const appState = getAppState();
 
-	// $inspect(appState.state);
 </script>
 
 <div class="frame">
@@ -82,6 +81,8 @@
 		position: absolute;
 		inset: 0;
 		overflow: hidden;
+		max-height: 100%;
+		/* background-color: black; */
 
 		/* position: absolute; */
 		/* width: 100%;

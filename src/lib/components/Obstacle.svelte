@@ -1,55 +1,32 @@
 <script>
-	import { scale, fly } from 'svelte/transition';
-	import { getPreferences } from '$lib/preferences.svelte';
-
 	let { obstacleData } = $props();
-
-	const preferences = getPreferences();
 </script>
 
-<button
-	class="frame"
-	in:fly={{ y: -500, duration: 1000 }}
-	out:scale
-	style={`
-		left: ${obstacleData.coordinates.x * preferences.tileSize}px; 
-		bottom: ${obstacleData.coordinates.y * preferences.tileSize}px;
-		width: ${preferences.tileSize}px;
-		height: ${preferences.tileSize}px;
-	`}
->
+<div class="frame">
 	<div
-		class="image"
+		class="background"
 		style={`
-			background-image: url(${obstacleData.type.source});
-			inset: ${preferences.tileGap}px;
+    		background-image: url(${obstacleData.type.source});
 		`}
 	></div>
-</button>
+</div>
 
 <style>
 	.frame {
-		position: absolute;
-		background-color: transparent;
-
-		border: none;
-		transition:
-			left 0.5s,
-			bottom 0.5s;
-		/* transition-delay: 0.5s; */
+		position: relative;
+		width: 100%;
+		height: 100%;
+		/* z-index: inherit; */
 	}
 
-	.image {
+	.background {
 		position: absolute;
-		background-color: red;
+		width: 100%;
+		height: 100%;
+		left: 0;
+		bottom: 0;
 		background-size: cover;
-		border-radius: 1rem;
-		overflow: hidden;
-		transition: scale linear 0.05s;
-        border: solid black 5px;
-		/* box-shadow:
-			4px 4px 8px #0008,
-			inset 8px 8px 8px #fff8,
-			inset -8px -8px 8px #0008; */
+		background-position: top;
+		/* z-index: inherit; */
 	}
 </style>

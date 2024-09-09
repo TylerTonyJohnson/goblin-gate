@@ -1,8 +1,25 @@
-import shrinkImage from '$lib/images/Shrink.png';
+import smiteImage from '$lib/images/Shrink.png';
 import swapImage from '$lib/images/Swap.png';
 import explodeImage from '$lib/images/Explode.png';
 
 import { MonsterTypes } from '$lib/classes/monsters.svelte';
+
+import { TileTypes } from '$lib/classes/tiles.svelte.js';
+import {
+	targetSingle,
+	targetLine,
+	targetCluster,
+	attackMonsters
+} from '$lib/classes/targets.svelte.js';
+
+const smite = (monsters, spell) => {
+	console.log(monsters);
+	return [];
+};
+
+const explode = (obstacle, spell) => {
+	console.log('exploding', obstacle);
+};
 
 export class SpellTypes {
 	constructor(type) {
@@ -11,14 +28,26 @@ export class SpellTypes {
 		this.range = type.range;
 		this.targets = type.targets;
 		this.cast = type.cast;
+		this.targetTypes = type.targetTypes;
+		this.target = type.target;
+		this.targetMin = type.targetMin;
+		this.getTargets = type.getTargets || (() => []);
+		this.hit = type.hit || (() => {});
+		this.damage = type.damage;
+		this.cost = type.cost;
 	}
 
-	static Shrink = new SpellTypes({
-		name: 'Shrink',
-		source: shrinkImage,
+	static Smite = new SpellTypes({
+		name: 'Smite',
+		source: smiteImage,
 		range: 0,
 		targets: 1,
-		cast: shrink
+		targetMin: 1,
+		targetTypes: [TileTypes.Monster],
+		getTargets: (...args) => targetCluster(...args, SpellTypes.Smite),
+		hit: (...args) => attackMonsters(...args, SpellTypes.Smite),
+		damage: Infinity,
+		cost: 1
 	});
 
 	static Swap = new SpellTypes({
@@ -26,7 +55,11 @@ export class SpellTypes {
 		source: swapImage,
 		range: 0,
 		targets: 2,
-		cast: swap
+		targetTypes: [TileTypes.Monster],
+		getTargets: (...args) => targetCluster(...args, SpellTypes.Swap),
+		hit: (...args) => attackMonsters(...args, SpellTypes.Swap),
+		damage: 0,
+		cost: 2
 	});
 
 	static Explode = new SpellTypes({
@@ -34,38 +67,46 @@ export class SpellTypes {
 		source: explodeImage,
 		range: 0,
 		targets: 1,
-		cast: explode
+		targetTypes: [TileTypes.Obstacle],
+		getTargets: (...args) => targetCluster(...args, SpellTypes.Explode),
+		hit: (...args) => explode(...args, SpellTypes.Explode),
+		damage: 0,
+		cost: 1
 	});
-}
 
-function shrink(monsters) {
-	console.log('shrinking');
+	/* 
+		Targeting Functions
+	*/
 
-	monsters.forEach((monster) => {
-		const newLevel = Math.max(monster.maxHealth - 1, 1);
-		if (newLevel === monster.maxHealth) return;
+	/* 
+		Casting Functions
+	*/
 
-		const candidates = Object.values(MonsterTypes).filter((type) => type.maxHealth === newLevel);
+	static shrink = (monsters) => {
+		console.log('shrinking');
 
-		const newMonsterType = candidates[Math.floor(Math.random() * candidates.length)];
+		monsters.forEach((monster) => {
+			const newLevel = Math.max(monster.maxHealth - 1, 1);
+			if (newLevel === monster.maxHealth) return;
 
-		monster.type = newMonsterType;
-		monster.maxHealth = newMonsterType.maxHealth;
-		monster.currentHealth = Math.min(newMonsterType.maxHealth, monster.currentHealth);
-	});
-}
+			const candidates = Object.values(MonsterTypes).filter((type) => type.maxHealth === newLevel);
 
-function swap(monsters) {
-	console.log('swapping');
+			const newMonsterType = candidates[Math.floor(Math.random() * candidates.length)];
 
-	// console.log(monster1);
-	const coordinates = monsters.map((monster) => monster.coordinates);
+			monster.type = newMonsterType;
+			monster.maxHealth = newMonsterType.maxHealth;
+			monster.currentHealth = Math.min(newMonsterType.maxHealth, monster.currentHealth);
+		});
+	};
 
-	monsters.forEach((monster, index) => {
-		monster.coordinates = coordinates[(index + 1) % 2];
-	});
-}
+	static swap = (monsters) => {
+		console.log('swapping');
 
-function explode(obstacle) {
-	console.log('exploding');
+		// console.log(monster1);
+		const coordinates = monsters.map((monster) => monster.coordinates);
+
+		monsters.forEach((monster, index) => {
+			monster.coordinates = coordinates[(index + 1) % 2];
+		});
+	};
 }
