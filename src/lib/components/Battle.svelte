@@ -41,7 +41,7 @@
 			battleParameters.clustering.toFixed(1)
 	);
 
-	let seed = $derived(germ + '-' + seedWater);
+	let seed = $derived(germ + '-' + seedWater); 
 
 	function flattenSeed(weights) {
 		return weights.reduce((acc, monsterWeight) => {
