@@ -25,7 +25,7 @@
 			<Tile
 				tileData={tile}
 				attack={() => hit(tile)}
-				hover={() => hover(tile)}
+				hover={hover}
 				unhover={() => hover(null)}
 				hovered={tile === hoveredTile}
 				attached={attachedTiles.includes(tile)}

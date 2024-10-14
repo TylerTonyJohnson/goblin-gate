@@ -11,7 +11,7 @@ export class TileTypes {
 	});
 	static Monster = new TileTypes({
 		name: 'Monster',
-        theme: 'red'
+        theme: 'orange'
 	});
 	static Treasure = new TileTypes({
 		name: 'Treasure',

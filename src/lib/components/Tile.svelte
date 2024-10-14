@@ -19,7 +19,7 @@
 
 <button
 	class="frame"
-	onmouseenter={hover}
+	onmouseenter={() => hover(tileData)}
 	onmouseleave={unhover}
 	onclick={attack}
 	class:hovered
@@ -40,7 +40,6 @@
 		class:top={tileData.type.size.y > 1}
 		style={`
 		inset: ${preferences.tileGap}px;
-		border-color: ${tileData.tileType.theme};
 	`}
 	>
 		{#if tileData.tileType === TileTypes.Obstacle}
@@ -75,10 +74,10 @@
 		transition: scale linear 0.05s;
 		border-radius: 1rem;
 		overflow: hidden;
-		border-width: 5px;
+		border-width: 3px;
+		border-color: white;
 		border-style: solid;
 		z-index: 1;
-		/* background-color: teal; */
 	}
 
 	.selectable {

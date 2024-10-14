@@ -5,6 +5,7 @@
 
 	function reinit() {
 		localStorage.clear();
+		location.reload();
 	}
 </script>
 

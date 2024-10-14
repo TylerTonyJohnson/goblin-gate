@@ -41,7 +41,7 @@
 			battleParameters.clustering.toFixed(1)
 	);
 
-	let seed = $derived(germ + '-' + seedWater); 
+	let seed = $derived(germ + '-' + seedWater);
 
 	function flattenSeed(weights) {
 		return weights.reduce((acc, monsterWeight) => {
@@ -58,6 +58,10 @@
 
 	let hoveredTile = $state();
 	let attachedTiles = $derived(player.currentTool.getTargets(hoveredTile, battle.tileData));
+
+	$inspect(hoveredTile, 'hoveredTile');
+	// $inspect(attachedTiles, 'attachedTiles');
+
 
 	let selectableTiles = $derived(
 		battle.tileData.filter((tile) => player.currentTool.targetTypes.includes(tile.tileType))

@@ -74,6 +74,38 @@ export class SpellTypes {
 		cost: 1
 	});
 
+	// Slice - hit an entire row, upgrades allow it to target more types of monsters
+	static Slice = new SpellTypes({
+		name: 'Slice',
+		source: explodeImage,
+		range: Infinity,
+		targets: 1,
+		targetTypes: [TileTypes.Monster],
+		getTargets: (...args) => targetCluster(...args, SpellTypes.Slice),
+		hit: (...args) => attackMonsters(...args, SpellTypes.Slice),
+		damage: 1,
+		cost: 1
+	});
+
+	// Freeze - freeze monsters
+	static Freeze = new SpellTypes({
+		name: 'Freeze',
+		source: explodeImage,
+		range: 0,
+		targets: 1,
+		targetTypes: [TileTypes.Monster],
+		getTargets: (...args) => targetCluster(...args, SpellTypes.Freeze),
+		hit: (...args) => attackMonsters(...args, SpellTypes.Freeze),
+		damage: 1,
+		cost: 1
+	});
+
+	// Soul catching - capture souls at the cost of mana
+
+	// Spell - refresh objectives?
+
+	// At beginning of battle - choose bounty to pursue
+
 	/* 
 		Targeting Functions
 	*/

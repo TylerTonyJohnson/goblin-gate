@@ -12,11 +12,11 @@
 >
 	<div class="health-bar">
 		{#each Array(monsterData.maxHealth) as heartToken, index}
-			{#if index < monsterData.currentHealth}
+			<!-- {#if index < monsterData.currentHealth}
 				<img src={GemTypes.Green.source} class="health-segment" alt="gem" />
 			{:else}
 				<img src={GemTypes.Gray.source} class="health-segment" alt="gem" />
-			{/if}
+			{/if} -->
 		{/each}
 	</div>
 </div>
@@ -42,7 +42,7 @@
 		align-items: center;
 		gap: 2px;
 
-		background-image: linear-gradient(to top, white, transparent);
+		/* background-image: linear-gradient(to top, white, transparent); */
 	}
 
 	.health-segment {
