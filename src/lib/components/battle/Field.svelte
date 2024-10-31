@@ -1,6 +1,7 @@
 <script>
-	import Tile from '$lib/components/Tile.svelte';
 	import { getPreferences } from '$lib/preferences.svelte';
+	import Tile from '$lib/components/battle/Tile.svelte';
+	import Selector from './Selector.svelte';
 
 	let {
 		tileData,
@@ -25,7 +26,7 @@
 			<Tile
 				tileData={tile}
 				attack={() => hit(tile)}
-				hover={hover}
+				{hover}
 				unhover={() => hover(null)}
 				hovered={tile === hoveredTile}
 				attached={attachedTiles.includes(tile)}
@@ -33,6 +34,9 @@
 				selected={selectedTiles.includes(tile)}
 			/>
 		{/each}
+		<!-- {#if hoveredTile}
+			<Selector {tileData} {hoveredTile} {attachedTiles} />
+		{/if} -->
 	</div>
 </div>
 

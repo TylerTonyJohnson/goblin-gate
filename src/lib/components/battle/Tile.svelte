@@ -1,10 +1,10 @@
 <script>
 	import { scale, fly } from 'svelte/transition';
 	import { getPreferences } from '$lib/preferences.svelte';
-	import Monster from '$lib/components/Monster.svelte';
-	import Obstacle from '$lib/components/Obstacle.svelte';
-	import Treasure from '$lib/components/Treasure.svelte';
-	import Villager from '$lib/components/Villager.svelte';
+	import Monster from '$lib/components/battle/Monster.svelte';
+	import Obstacle from '$lib/components/battle/Obstacle.svelte';
+	import Treasure from '$lib/components/battle/Treasure.svelte';
+	import Villager from '$lib/components/battle/Villager.svelte';
 
 	import { TileTypes } from '$lib/classes/tiles.svelte';
 

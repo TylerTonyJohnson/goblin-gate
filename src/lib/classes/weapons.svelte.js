@@ -11,6 +11,7 @@ import cleaverImage from '$lib/images/Cleaver.png';
 import longswordImage from '$lib/images/Longsword.png';
 import magibladeImage from '$lib/images/Magiblade.png';
 import arrowImage from '$lib/images/Arrow.png';
+import netImage from '$lib/images/Net.png';
 
 export class WeaponTypes {
 	constructor(type) {
@@ -83,5 +84,17 @@ export class WeaponTypes {
 		targetTypes: [TileTypes.Monster, TileTypes.Obstacle, TileTypes.Treasure],
 		getTargets: (...args) => targetLine(...args, WeaponTypes.Arrow),
 		hit: (...args) => attackMonsters(...args, WeaponTypes.Arrow)
+	});
+
+	static Net = new WeaponTypes({
+		name: 'Net',
+		source: netImage,
+		range: 1,
+		targets: 1,
+		targetMin: 1,
+		damage: 1,
+		targetTypes: [TileTypes.Monster],
+		getTargets: (...args) => targetSingle(...args, WeaponTypes.Net),
+		hit: (...args) => attackMonsters(...args, WeaponTypes.Net)
 	});
 }

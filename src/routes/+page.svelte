@@ -7,15 +7,15 @@
 	import editImage from '$lib/images/Blueprint.png';
 
 	import { AppStates, setAppState, getAppState } from '$lib/appState.svelte';
-	import Title from '$lib/components/Title.svelte';
-	import Map from '$lib/components/Map.svelte';
-	import Battle from '$lib/components/Battle.svelte';
-	import Village from '$lib/components/Village.svelte';
 	import { fly } from 'svelte/transition';
-	import Tavern from '../lib/components/Tavern.svelte';
+
+	import Title from '$lib/components/Title.svelte';
+	import Map from '$lib/components/world/Map.svelte';
+	import Battle from '$lib/components/battle/Battle.svelte';
+	import Village from '$lib/components/world/Village.svelte';
+	import Tavern from '../lib/components/world/Tavern.svelte';
 
 	const appState = getAppState();
-
 </script>
 
 <div class="frame">

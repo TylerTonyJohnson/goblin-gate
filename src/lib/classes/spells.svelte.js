@@ -37,6 +37,8 @@ export class SpellTypes {
 		this.cost = type.cost;
 	}
 
+
+	// Destroy one monster, can only target one
 	static Smite = new SpellTypes({
 		name: 'Smite',
 		source: smiteImage,
@@ -50,6 +52,7 @@ export class SpellTypes {
 		cost: 1
 	});
 
+	// Swap the position of two monsters, limited by range
 	static Swap = new SpellTypes({
 		name: 'Swap',
 		source: swapImage,

@@ -1,8 +1,8 @@
-import profileBlack from '$lib/images/Jewel Blue.png';
+import profileBlack from '$lib/images/Jewel Orange.png';
 import profileWhite from '$lib/images/Jewel Purple.png';
-import profileYellow from '$lib/images/Jewel Green.png';
-import profileGreen from '$lib/images/Jewel Orange.png';
-import profileBlue from '$lib/images/Jewel Yellow.png';
+import profileYellow from '$lib/images/Jewel Yellow.png';
+import profileGreen from '$lib/images/Jewel Green.png';
+import profileBlue from '$lib/images/Jewel Blue.png';
 import profileRed from '$lib/images/Jewel Red.png';
 
 export class MonsterTypes {

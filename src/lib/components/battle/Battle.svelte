@@ -7,13 +7,10 @@
 	import { Battle } from '$lib/classes/battle.svelte.js';
 	import { getRandomWord } from '$lib/classes/random.svelte';
 
-	import Bench from '$lib/components/Bench.svelte';
-	import EnduranceBar from '$lib/components/EnduranceBar.svelte';
-	import ExperienceBar from '$lib/components/ExperienceBar.svelte';
+	import Editor from '$lib/components/editor/Editor.svelte';
+	import Bench from '$lib/components/battle/Bench.svelte';
 	import Defeat from './Defeat.svelte';
 	import Field from './Field.svelte';
-	import BattleMenu from './BattleMenu.svelte';
-	import RunMenu from './RunMenu.svelte';
 
 	const appState = getAppState();
 	const player = getPlayer();
@@ -59,7 +56,7 @@
 	let hoveredTile = $state();
 	let attachedTiles = $derived(player.currentTool.getTargets(hoveredTile, battle.tileData));
 
-	$inspect(hoveredTile, 'hoveredTile');
+	// $inspect(hoveredTile, 'hoveredTile');
 	// $inspect(attachedTiles, 'attachedTiles');
 
 
@@ -128,22 +125,24 @@
 	<Bench />
 
 	{#if appState.state !== AppStates.Edit}
-		<EnduranceBar />
-		<ExperienceBar />
+		<!-- <EnduranceBar /> -->
+		<!-- <ExperienceBar /> -->
 	{:else}
-		<BattleMenu bind:battleParameters {seed} {resetBattle} {newBattle} />
-		<RunMenu stats={battle.stats} pool={battle.tilePool} />
+		<Editor {battle} {battleParameters} {seed} {resetBattle} {newBattle}  />
+		<!-- <BattleMenu bind:battleParameters {seed} {resetBattle} {newBattle} />
+		<RunMenu stats={battle.stats} pool={battle.tilePool} /> -->
 	{/if}
 	{#if player.currentEndurance < 1}
-		<Defeat />
+		<!-- <Defeat /> -->
 	{/if}
 </div>
 
 <style>
 	.frame {
 		position: relative;
-		max-height: 100%;
+		height: 100%;
 		display: grid;
+		/* place-items: center; */
 		grid-template-columns: 1fr auto 1fr;
 		grid-template-rows: auto 1fr auto;
 		grid-template-areas:
@@ -152,6 +151,6 @@
 			'bench 	bench   bench';
 		padding: 1rem;
 		gap: 1rem;
-		/* background-color: teal; */
+		/* background-color: purple; */
 	}
 </style>

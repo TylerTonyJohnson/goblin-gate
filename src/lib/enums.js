@@ -26,16 +26,6 @@ export class TokenTypes {
 	static Attack = new TokenTypes('attack', attack);
 }
 
-export class Directions {
-	cosntructor(name) {
-		this.name = name;
-	}
-	static Up = new Directions('up');
-	static Down = new Directions('down');
-	static Left = new Directions('left');
-	static Right = new Directions('right');
-}
-
 import battleImage from '$lib/images/Battle.svg';
 import villageImage from '$lib/images/Village.svg';
 import nightBattleImage from '$lib/images/Night Battle.svg';
@@ -48,4 +38,16 @@ export class LocationTypes {
 	static Battle = new LocationTypes('battle', battleImage);
 	static NightBattle = new LocationTypes('nightBattle', nightBattleImage);
 	static Village = new LocationTypes('village', villageImage);
+}
+
+export class Directions {
+	constructor(type) {
+		this.name = type.name;
+		this.x = type.x;
+		this.y = type.y;
+	}
+	static Up = new Directions({ name: 'up', x: 0, y: -1 });
+	static Down = new Directions({ name: 'down', x: 0, y: 1 });
+	static Left = new Directions({ name: 'left', x: -1, y: 0 });
+	static Right = new Directions({ name: 'right', x: 1, y: 0 });
 }

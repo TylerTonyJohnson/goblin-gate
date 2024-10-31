@@ -13,17 +13,15 @@ class Player {
 	maxMana = $state(5);
 	currentMana = $state(4);
 
-	maxCharge = $state(10);
+	maxCharge = $state(25);
 	currentCharge = $state(0);
 
 	currentExperience = $state(0);
 
 	unlockedWeapons = $state([
 		WeaponTypes.Sword,
-		WeaponTypes.Cleaver,
-		WeaponTypes.Longsword,
-		WeaponTypes.Magiblade,
-		WeaponTypes.Arrow
+		WeaponTypes.Arrow,
+		WeaponTypes.Net
 	]);
 	currentWeapon = $state(this.unlockedWeapons[0]);
 
